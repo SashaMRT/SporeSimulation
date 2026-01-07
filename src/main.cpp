@@ -1,29 +1,28 @@
 #include <SFML/Graphics.hpp>
-#include "monde.hpp"
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode({1280, 720}), "Spore Simulation");
+    sf::RenderWindow window(sf::VideoMode(sf::Vector2u(1280u, 720u)), "Spore Simulation");
     window.setFramerateLimit(60);
-    
-    Monde monde;
-    
-    monde.spawnAlgue({400, 360});
-    monde.spawnAlgue({200, 200});
-    monde.spawnAlgue({600, 500});
-    
+
     while (window.isOpen()) {
-        while (const std::optional<sf::Event> event = window.pollEvent()) {
-            if (event->is<sf::Event::Closed>()) {
+        while (const auto event = window.pollEvent()) {
+            if (event->is<sf::Event::Closed>()) 
                 window.close();
-            }
         }
-        
-        monde.update(0.016f);
-        
+
         window.clear(sf::Color::Black);
-        monde.dessiner(window);
+        
+        sf::RectangleShape Simulation(sf::Vector2f(900.f, 720.f));
+        Simulation.setFillColor(sf::Color(10, 30, 50));
+        Simulation.setPosition(sf::Vector2f(0.f, 0.f));
+        window.draw(Simulation);
+        
+        sf::RectangleShape menu(sf::Vector2f(380.f, 720.f));
+        menu.setFillColor(sf::Color(40, 40, 40, 180));
+        menu.setPosition(sf::Vector2f(900.f, 0.f));
+        window.draw(menu);
+        
         window.display();
     }
-    
     return 0;
 }
