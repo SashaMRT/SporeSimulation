@@ -18,32 +18,32 @@ void Monde::update(float dt) {
 
         sf::Vector2f pos = e->getPosition();
         TypeEntite type = e->getType();
-
         e->update(dt, *this);
 
         if (!e->estVivante() && type == TypeEntite::BACTERIE && e->getEnergie() >= 100.f) {
-            if (rand() % 2 == 0)
-                nouveau.push_back(std::make_unique<Herbivore>(pos));
-            else
-                nouveau.push_back(std::make_unique<Carnivore>(pos));
+            bool var = (rand() % 2 == 0);
+            if (rand() % 2 == 0) nouveau.push_back(std::make_unique<Herbivore>(pos, var));
+            else nouveau.push_back(std::make_unique<Carnivore>(pos, var));
+            continue;
         }
 
         if (e->estVivante() && (type == TypeEntite::HERBIVORE || type == TypeEntite::CARNIVORE)) {
-            if (e->getEnergie() >= 180.f) {
-                e->setEnergie(90.f); 
+            if (e->getEnergie() >= 200.f) {
+                e->setEnergie(60.f);
+                bool varEnfant = (rand() % 2 == 0);
+                sf::Vector2f offset(30.f, 30.f);
+
                 if (type == TypeEntite::HERBIVORE)
-                    nouveau.push_back(std::make_unique<Herbivore>(pos + sf::Vector2f(10.f, 10.f)));
+                    nouveau.push_back(std::make_unique<Herbivore>(pos + offset, varEnfant));
                 else
-                    nouveau.push_back(std::make_unique<Carnivore>(pos + sf::Vector2f(10.f, 10.f)));
+                    nouveau.push_back(std::make_unique<Carnivore>(pos + offset, varEnfant));
+                
             }
         }
     }
 
     remove();
-
-    for (auto& n : nouveau) {
-        entites.push_back(std::move(n));
-    }
+    for (auto& n : nouveau) entites.push_back(std::move(n));
 }
 
 void Monde::dessiner(sf::RenderTarget& cible) const {
