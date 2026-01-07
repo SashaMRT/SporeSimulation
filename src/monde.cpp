@@ -31,6 +31,16 @@ void Monde::update(float dt) {
             else
                 nouveau.push_back(std::make_unique<Carnivore>(pos));
         }
+
+        if (e->estVivante() && (type == TypeEntite::HERBIVORE || type == TypeEntite::CARNIVORE)) {
+            if (e->getEnergie() >= 180.f) {
+                e->setEnergie(90.f); 
+                if (type == TypeEntite::HERBIVORE)
+                    nouveau.push_back(std::make_unique<Herbivore>(pos + sf::Vector2f(10.f, 10.f)));
+                else
+                    nouveau.push_back(std::make_unique<Carnivore>(pos + sf::Vector2f(10.f, 10.f)));
+            }
+        }
     }
 
     remove();

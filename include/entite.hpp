@@ -33,8 +33,8 @@ public:
     TypeEntite getType() const { return type; }
     bool estVivante() const { return vivante; }
     void tuer() { vivante = false; }
-    
+    void setEnergie(float e) { energie = e; }
+
 protected:
     void setPosition(sf::Vector2f pos) { position = pos; }
-    void setEnergie(float e) { energie = e; }
 };
