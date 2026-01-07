@@ -1,26 +1,41 @@
 #include <SFML/Graphics.hpp>
+#include "monde.hpp"
+#include "rendu.hpp"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(sf::Vector2u(1280u, 720u)), "Spore Simulation");
     window.setFramerateLimit(60);
 
+    Monde monde(sf::FloatRect({0.f, 0.f}, {900.f, 720.f}));
+    Rendu rendu;
+    sf::Clock clock;
+
+    for (int i = 0; i < 10; ++i) {
+        monde.spawnAlgue({static_cast<float>(rand() % 800 + 50), static_cast<float>(rand() % 600 + 50)});
+    }
+
+    for (int i = 0; i < 5; ++i) {
+        monde.spawnBacterie({static_cast<float>(rand() % 800 + 50), static_cast<float>(rand() % 600 + 50)});
+    }
+
     while (window.isOpen()) {
+        float dt = clock.restart().asSeconds();
+
         while (const auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) 
                 window.close();
         }
 
+        monde.update(dt);
+
         window.clear(sf::Color::Black);
         
-        sf::RectangleShape Simulation(sf::Vector2f(900.f, 720.f));
-        Simulation.setFillColor(sf::Color(10, 30, 50));
-        Simulation.setPosition(sf::Vector2f(0.f, 0.f));
-        window.draw(Simulation);
+        sf::RectangleShape ZoneSimulation(sf::Vector2f(900.f, 720.f));
+        ZoneSimulation.setFillColor(sf::Color(10, 30, 50));
+        window.draw(ZoneSimulation);
         
-        sf::RectangleShape menu(sf::Vector2f(380.f, 720.f));
-        menu.setFillColor(sf::Color(40, 40, 40, 180));
-        menu.setPosition(sf::Vector2f(900.f, 0.f));
-        window.draw(menu);
+        monde.dessiner(window);
+        rendu.menu(monde, window, 0.f, 0);
         
         window.display();
     }

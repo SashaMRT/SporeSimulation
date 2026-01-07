@@ -6,8 +6,9 @@ class Monde;
 
 enum class TypeEntite {
     ALGUE,
+    BACTERIE,
     HERBIVORE,
-    PREDATEUR
+    CARNIVORE
 };
 
 class Entite {
