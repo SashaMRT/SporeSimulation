@@ -42,3 +42,11 @@ endif()
 
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT main)
+
+add_custom_command(
+    TARGET SporeSimulation POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:SporeSimulation>/assets
+    COMMENT "Copie des assets vers le dossier de build..."
+)

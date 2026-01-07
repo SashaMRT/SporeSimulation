@@ -1,22 +1,31 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #include "monde.hpp"
 #include "rendu.hpp"
 
+void initialiserMonde(Monde& monde) {
+    monde.reset();
+    for (int i = 0; i < 50; ++i) 
+        monde.spawnAlgue({static_cast<float>(rand() % 850 + 25), static_cast<float>(rand() % 680 + 20)});
+    for (int i = 0; i < 5; ++i) 
+        monde.spawnBacterie({static_cast<float>(rand() % 850 + 25), static_cast<float>(rand() % 680 + 20)});
+}
+
 int main() {
-    sf::RenderWindow window(sf::VideoMode(sf::Vector2u(1280u, 720u)), "Spore Simulation");
+    sf::RenderWindow window(sf::VideoMode({1280u, 720u}), "Spore Simulation");
     window.setFramerateLimit(60);
 
     Monde monde(sf::FloatRect({0.f, 0.f}, {900.f, 720.f}));
+    
     Rendu rendu;
+    if (!rendu.init("arial.ttf")) {
+        std::cerr << "Erreur: Police introuvable" << std::endl;
+    }
+
+    initialiserMonde(monde);
+
     sf::Clock clock;
-
-    for (int i = 0; i < 50; ++i) {
-        monde.spawnAlgue({static_cast<float>(rand() % 800 + 50), static_cast<float>(rand() % 600 + 50)});
-    }
-
-    for (int i = 0; i < 5; ++i) {
-        monde.spawnBacterie({static_cast<float>(rand() % 800 + 50), static_cast<float>(rand() % 600 + 50)});
-    }
+    bool enPause = false;
 
     while (window.isOpen()) {
         float dt = clock.restart().asSeconds();
@@ -24,18 +33,34 @@ int main() {
         while (const auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) 
                 window.close();
+            
+            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                if (keyPressed->code == sf::Keyboard::Key::Escape)
+                    window.close();
+                
+                if (keyPressed->code == sf::Keyboard::Key::P)
+                    enPause = !enPause;
+                
+                if (keyPressed->code == sf::Keyboard::Key::R) {
+                    initialiserMonde(monde);
+                    enPause = false; 
+                }
+            }
         }
 
-        monde.update(dt);
+        if (!enPause) {
+            monde.update(dt);
+        }
 
         window.clear(sf::Color::Black);
         
-        sf::RectangleShape ZoneSimulation(sf::Vector2f(900.f, 720.f));
-        ZoneSimulation.setFillColor(sf::Color(10, 30, 50));
-        window.draw(ZoneSimulation);
+        sf::RectangleShape zoneJeu({900.f, 720.f});
+        zoneJeu.setFillColor(sf::Color(10, 30, 50));
+        window.draw(zoneJeu);
         
         monde.dessiner(window);
-        rendu.menu(monde, window, 0.f, 0);
+        
+        rendu.menu(monde, window, enPause);
         
         window.display();
     }

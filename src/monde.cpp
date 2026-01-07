@@ -6,10 +6,6 @@
 #include <algorithm>
 #include <cmath>
 
-Monde::Monde() 
-    : limites(sf::Vector2f(0, 0), sf::Vector2f(900, 720)) {
-}
-
 Monde::Monde(sf::FloatRect limites) 
     : limites(limites) {
 }
@@ -66,6 +62,10 @@ void Monde::spawnBacterie(sf::Vector2f pos) {
     entites.emplace_back(std::make_unique<Bacterie>(pos));
 }
 
+void Monde::reset() {
+    entites.clear();
+}
+
 Entite* Monde::getPlusProche(sf::Vector2f pos, TypeEntite typeCherche) {
     Entite* cible = nullptr;
     float distMin = 1e9f;
@@ -88,4 +88,19 @@ void Monde::remove() {
     std::erase_if(entites, [](const auto& e) { 
         return !e->estVivante(); 
     });
+}
+
+Stats Monde::getStats() const {
+    Stats s;
+    for (const auto& e : entites) {
+        if (e->estVivante()) {
+            switch (e->getType()) {
+                case TypeEntite::ALGUE: s.nbAlgues++; break;
+                case TypeEntite::BACTERIE: s.nbBacteries++; break;
+                case TypeEntite::HERBIVORE: s.nbHerbivores++; break;
+                case TypeEntite::CARNIVORE: s.nbCarnivores++; break;
+            }
+        }
+    }
+    return s;
 }

@@ -5,9 +5,13 @@
 class Rendu {
 public:
     Rendu();
-    void menu(const Monde& monde, sf::RenderTarget& cible, float tempsReel, unsigned int ticks);
+    bool init(const std::string& cheminFont);
+    void menu(const Monde& monde, sf::RenderTarget& cible, bool enPause);
 
 private:
     sf::Font font;
     sf::RectangleShape fond;
+    sf::Text titre;
+
+    void dessinerLigneStat(sf::RenderTarget& cible, const std::string& nomEspece, int valeur, sf::Color couleur, float y) const;
 };
