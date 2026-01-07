@@ -1,6 +1,8 @@
 #include "monde.hpp"
 #include "algue.hpp"
 #include "bacterie.hpp"
+#include "herbivore.hpp"
+#include "carnivore.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -13,12 +15,29 @@ Monde::Monde(sf::FloatRect limites)
 }
 
 void Monde::update(float dt) {
+    std::vector<std::unique_ptr<Entite>> nouveau;
+
     for (auto& e : entites) {
-        if (e->estVivante()) {
-            e->update(dt, *this);
+        if (!e->estVivante()) continue;
+
+        sf::Vector2f pos = e->getPosition();
+        TypeEntite type = e->getType();
+
+        e->update(dt, *this);
+
+        if (!e->estVivante() && type == TypeEntite::BACTERIE && e->getEnergie() >= 100.f) {
+            if (rand() % 2 == 0)
+                nouveau.push_back(std::make_unique<Herbivore>(pos));
+            else
+                nouveau.push_back(std::make_unique<Carnivore>(pos));
         }
     }
+
     remove();
+
+    for (auto& n : nouveau) {
+        entites.push_back(std::move(n));
+    }
 }
 
 void Monde::dessiner(sf::RenderTarget& cible) const {

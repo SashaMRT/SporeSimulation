@@ -22,7 +22,8 @@ void Bacterie::update(float dt, Monde& monde) {
         }
 
         if (distance < rayon + cible->getRayon()) {
-            energie += 30.f;
+            energie += 30.f; 
+            cible->tuer(); 
         }
     }
 
@@ -32,7 +33,7 @@ void Bacterie::update(float dt, Monde& monde) {
     if (position.x < limites.position.x || position.x > limites.size.x) vitesse.x *= -1;
     if (position.y < limites.position.y || position.y > limites.size.y) vitesse.y *= -1;
 
-    if (energie >= 100.f) {
+    if (energie >= 250.f) {
         evoluer(monde);
     }
 }

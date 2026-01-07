@@ -10,7 +10,7 @@ int main() {
     Rendu rendu;
     sf::Clock clock;
 
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 50; ++i) {
         monde.spawnAlgue({static_cast<float>(rand() % 800 + 50), static_cast<float>(rand() % 600 + 50)});
     }
 

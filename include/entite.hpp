@@ -32,9 +32,9 @@ public:
     float getEnergie() const { return energie; }
     TypeEntite getType() const { return type; }
     bool estVivante() const { return vivante; }
-
+    void tuer() { vivante = false; }
+    
 protected:
     void setPosition(sf::Vector2f pos) { position = pos; }
     void setEnergie(float e) { energie = e; }
-    void tuer() { vivante = false; }
 };
