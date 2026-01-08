@@ -1,6 +1,4 @@
 #pragma once
-#include "monde.hpp"
-#include <SFML/Graphics.hpp>
 
 class Rendu {
 public:

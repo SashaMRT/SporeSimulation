@@ -1,8 +1,3 @@
-#include "herbivore.hpp"
-#include "monde.hpp"
-#include <cmath>
-#include <cstdint>
-
 Herbivore::Herbivore(sf::Vector2f pos, float vitesse, float taille, float vue) 
     : Entite(pos, TypeEntite::HERBIVORE, taille, 100.f),
       vitesseMax(vitesse), porteeVue(vue), invisible(false), 

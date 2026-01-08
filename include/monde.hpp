@@ -1,9 +1,4 @@
 #pragma once
-#include "entite.hpp"
-#include "particule.hpp"
-#include <vector>
-#include <memory>
-#include <SFML/Graphics.hpp>
 
 struct Stats {
     int nbAlgues = 0;

@@ -1,8 +1,3 @@
-#include <SFML/Graphics.hpp>
-#include <iostream>
-#include "monde.hpp"
-#include "rendu.hpp"
-
 void initialiserMonde(Monde& monde, sf::Vector2f tailleFenetre) {
     monde.reset();
 

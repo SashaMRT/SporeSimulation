@@ -40,6 +40,32 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
 endif()
 
+target_precompile_headers(${PROJECT_NAME} PRIVATE
+
+    <iostream>
+    <vector>
+    <string>
+    <algorithm>
+    <cmath>
+    <memory>
+    <cstdint>
+    <cstdlib>
+    <ctime>
+
+    <SFML/Graphics.hpp>
+    <SFML/Window.hpp>
+    <SFML/System.hpp>
+
+    "include/entite.hpp"
+    "include/particule.hpp"
+    "include/algue.hpp"
+    "include/rocher.hpp"
+    "include/bacterie.hpp"
+    "include/herbivore.hpp"
+    "include/carnivore.hpp"
+    "include/monde.hpp"
+    "include/rendu.hpp"
+)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT main)
 

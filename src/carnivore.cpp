@@ -1,9 +1,3 @@
-#include "carnivore.hpp"
-#include "monde.hpp"
-#include "herbivore.hpp"
-#include <cmath>
-#include <cstdint>
-
 Carnivore::Carnivore(sf::Vector2f pos, float vitesse, float taille, float vue) 
     : Entite(pos, TypeEntite::CARNIVORE, taille, 150.f), 
     vitesseMax(vitesse),  porteeVue(vue)

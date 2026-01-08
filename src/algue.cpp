@@ -1,7 +1,3 @@
-#include <cmath>
-#include "algue.hpp"
-#include "monde.hpp"
-
 Algue::Algue(sf::Vector2f pos) 
     : Entite(pos, TypeEntite::ALGUE, 12.f, 200.f) {
 }

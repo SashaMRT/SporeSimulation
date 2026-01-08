@@ -1,12 +1,3 @@
-#include "monde.hpp"
-#include "algue.hpp"
-#include "bacterie.hpp"
-#include "herbivore.hpp"
-#include "carnivore.hpp"
-#include "rocher.hpp"
-#include <algorithm>
-#include <cmath>
-
 Monde::Monde(sf::FloatRect limites) 
     : limites(limites) {
 }

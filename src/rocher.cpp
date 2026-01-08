@@ -1,6 +1,3 @@
-#include "rocher.hpp"
-#include <vector>
-
 Rocher::Rocher(sf::Vector2f pos) 
     : Entite(pos, TypeEntite::ROCHER, 25.f + (rand() % 20), 1000.f) {
 }

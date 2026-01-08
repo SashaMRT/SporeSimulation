@@ -1,9 +1,3 @@
-#include "bacterie.hpp"
-#include "monde.hpp"
-#include "herbivore.hpp"
-#include "carnivore.hpp"
-#include <cmath>
-
 Bacterie::Bacterie(sf::Vector2f pos) 
     : Entite(pos, TypeEntite::BACTERIE, 10.f, 50.f), vitesseMax(100.f) {
     vitesse = {vitesseMax, vitesseMax};

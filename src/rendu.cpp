@@ -1,9 +1,3 @@
-#include "rendu.hpp"
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <cmath>
-
 Rendu::Rendu() : titre(font) {
     fond.setSize({380.f, 2000.f});
     fond.setFillColor(sf::Color(25, 25, 30, 230));

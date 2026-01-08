@@ -1,5 +1,4 @@
 #pragma once
-#include "entite.hpp"
 
 class Bacterie : public Entite {
 public:
