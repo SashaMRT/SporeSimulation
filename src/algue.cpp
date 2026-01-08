@@ -1,5 +1,5 @@
 Algue::Algue(sf::Vector2f pos) 
-    : Entite(pos, TypeEntite::ALGUE, 12.f, 200.f) {
+    : Entite(pos, TypeEntite::ALGUE, Constantes::ALGUE_RAYON, Constantes::ALGUE_ENERGIE) {
 }
 
 void Algue::update(float dt, Monde& monde) {
@@ -18,7 +18,7 @@ void Algue::dessiner(sf::RenderTarget& cible) const {
         float oscillation = std::sin(temps * 1.5f + i * 0.5f) * (i * 0.6f);
         
         sf::CircleShape segment(taille);
-        segment.setOrigin(sf::Vector2f(taille, taille));
+        segment.setOrigin({taille, taille});
         segment.setFillColor(sf::Color(34 + i*5, 120 + i*8, 50 + i*2, 255 - i*15));
         segment.setPosition(position + sf::Vector2f(oscillation, -i * hauteurSegment));
         cible.draw(segment);

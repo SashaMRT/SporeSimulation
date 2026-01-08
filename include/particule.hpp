@@ -18,15 +18,15 @@ public:
 
     void update(float dt) {
         position += vitesse * dt;
-        vitesse *= 0.98f; // Légère friction
+        vitesse *= Constantes::PARTICULE_FRICTION;
         angle += rotation * dt;
-        vie -= dt * 0.8f; // Vie plus longue
+        vie -= dt * Constantes::PARTICULE_VIE_DECAY;
     }
 
     void dessiner(sf::RenderTarget& cible) const {
         if (vie <= 0) return;
         
-        float taille = tailleInitiale * (0.5f + vie * 0.5f); // Rétrécit avec la vie
+        float taille = tailleInitiale * (0.5f + vie * 0.5f);
         
         sf::RectangleShape forme({taille, taille});
         forme.setOrigin({taille / 2.f, taille / 2.f});
@@ -34,7 +34,7 @@ public:
         forme.setRotation(sf::degrees(angle));
         
         sf::Color c = couleur;
-        c.a = static_cast<std::uint8_t>(std::max(0.f, vie) * 200); // Transparence
+        c.a = static_cast<std::uint8_t>(std::max(0.f, vie) * 200);
         
         forme.setFillColor(c);
         cible.draw(forme);

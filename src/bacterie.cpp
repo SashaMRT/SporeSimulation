@@ -1,35 +1,28 @@
 Bacterie::Bacterie(sf::Vector2f pos) 
-    : Entite(pos, TypeEntite::BACTERIE, 10.f, 50.f), vitesseMax(100.f) {
-    vitesse = {vitesseMax, vitesseMax};
+    : Entite(pos, TypeEntite::BACTERIE, Constantes::BACTERIE_RAYON, Constantes::BACTERIE_ENERGIE) {
 }
 
 void Bacterie::update(float dt, Monde& monde) {
     Entite* cible = monde.getPlusProche(position, TypeEntite::ALGUE);
-
+    
     if (cible) {
-        sf::Vector2f direction = cible->getPosition() - position;
-        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+        sf::Vector2f diff = cible->getPosition() - position;
+        float dist = std::hypot(diff.x, diff.y);
         
-        if (distance > 0) {
-            direction /= distance; 
-            vitesse = direction * vitesseMax;
+        if (dist > 0.001f) {
+            sf::Vector2f dir = diff / dist;
+            position += dir * 40.f * dt; 
         }
 
-        if (distance < rayon + cible->getRayon()) {
-            energie += 30.f; 
-            cible->tuer(); 
+        if (dist < rayon + cible->getRayon()) {
+            // CORRECTION : On utilise la constante (50) au lieu de 15
+            energie += Constantes::ALGUE_ENERGIE; 
+            cible->tuer();
         }
     }
-
-    position += vitesse * dt;
-
-    sf::FloatRect limites = monde.getLimites();
-    if (position.x < limites.position.x || position.x > limites.size.x) vitesse.x *= -1;
-    if (position.y < limites.position.y || position.y > limites.size.y) vitesse.y *= -1;
-
-    if (energie >= 250.f) {
-        evoluer(monde);
-    }
+    
+    energie -= 5.f * dt;
+    if (energie <= 0) tuer();
 }
 
 void Bacterie::dessiner(sf::RenderTarget& cible) const {
@@ -63,8 +56,4 @@ void Bacterie::dessiner(sf::RenderTarget& cible) const {
     noyauinterne.setFillColor(sf::Color(255, 255, 255, 200));
     noyauinterne.setPosition(position - sf::Vector2f(rayon * 0.1f, rayon * 0.1f));
     cible.draw(noyauinterne);
-}
-
-void Bacterie::evoluer(Monde& monde) {
-    tuer();
 }

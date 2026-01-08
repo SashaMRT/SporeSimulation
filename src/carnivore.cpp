@@ -1,5 +1,5 @@
 Carnivore::Carnivore(sf::Vector2f pos, float vitesse, float taille, float vue) 
-    : Entite(pos, TypeEntite::CARNIVORE, taille, 150.f), 
+    : Entite(pos, TypeEntite::CARNIVORE, taille, Constantes::CARNIVORE_ENERGIE_BASE), 
     vitesseMax(vitesse),  porteeVue(vue)
 {    
     float angle = (rand() % 360) * 3.14159f / 180.f;
@@ -7,32 +7,17 @@ Carnivore::Carnivore(sf::Vector2f pos, float vitesse, float taille, float vue)
 }
 
 void Carnivore::update(float dt, Monde& monde) {
-    Entite* ami = monde.getPlusProche(position, TypeEntite::CARNIVORE);
-    float bonusMeute = 1.0f;
-
-    if (ami) {
-        float distAmi = std::hypot(ami->getPosition().x - position.x, ami->getPosition().y - position.y);
-        if (distAmi > 0.1f && distAmi < 150.f) {
-            bonusMeute = 1.3f;
-        }
-    }
-
     Entite* proie = monde.getPlusProche(position, TypeEntite::HERBIVORE);
-    bool chasseEnCours = false;
 
     if (proie) {
         Herbivore* herbivore = dynamic_cast<Herbivore*>(proie);
         float dist = std::hypot(proie->getPosition().x - position.x, proie->getPosition().y - position.y);
         
         if (herbivore && !herbivore->estInvisible() && dist < porteeVue) {
-            chasseEnCours = true;
             sf::Vector2f direction = proie->getPosition() - position;
-            
             if (dist > 0.001f) {
-                float vitesseActuelle = vitesseMax * bonusMeute; 
-                vitesse = (direction / dist) * vitesseActuelle;
+                vitesse = (direction / dist) * vitesseMax;
             }
-
             if (dist < rayon + proie->getRayon()) {
                 energie += 80.f; 
                 proie->tuer();
@@ -40,40 +25,13 @@ void Carnivore::update(float dt, Monde& monde) {
         }
     }
 
-    if (!chasseEnCours) {
-        if (rand() % 100 < 2) {
-             float angle = (rand() % 360) * 3.14159f / 180.f;
-             vitesse = sf::Vector2f(std::cos(angle), std::sin(angle)) * (vitesseMax * 0.5f * (bonusMeute > 1.f ? 1.2f : 1.f));
-        }
-    }
-
     position += vitesse * dt;
-
     sf::FloatRect limites = monde.getLimites();
-
-    if (position.x < limites.position.x) { 
-        position.x = limites.position.x; 
-        vitesse.x = std::abs(vitesse.x); 
-    }
-
-    if (position.x > limites.size.x) { 
-        position.x = limites.size.x; 
-        vitesse.x = -std::abs(vitesse.x); 
-    }
-
-    if (position.y < limites.position.y) { 
-        position.y = limites.position.y; 
-        vitesse.y = std::abs(vitesse.y); 
-    }
-
-    if (position.y > limites.size.y) { 
-        position.y = limites.size.y; 
-        vitesse.y = -std::abs(vitesse.y); 
-    }
+    if (position.x < limites.position.x || position.x > limites.size.x) vitesse.x *= -1;
+    if (position.y < limites.position.y || position.y > limites.size.y) vitesse.y *= -1;
 
     energie -= (rayon * 0.15f + vitesseMax * 0.01f) * dt;
-    if (energie <= 0) 
-        tuer();
+    if (energie <= 0) tuer();
 }
 
 void Carnivore::dessiner(sf::RenderTarget& cible) const {
@@ -116,7 +74,6 @@ void Carnivore::dessiner(sf::RenderTarget& cible) const {
     corps.setPosition(position);
     corps.setRotation(sf::degrees(angleDeg));
     corps.setFillColor(couleurPeau);
-    
     corps.setOutlineThickness(2.f);
     corps.setOutlineColor(couleurContour);
     cible.draw(corps);

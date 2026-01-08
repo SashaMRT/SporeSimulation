@@ -4,23 +4,27 @@ void initialiserMonde(Monde& monde, sf::Vector2f tailleFenetre) {
     int larg = std::max(1, (int)tailleFenetre.x);
     int haut = std::max(1, (int)tailleFenetre.y);
 
-    for (int i = 0; i < 6; ++i) 
+    for (int i = 0; i < Constantes::NB_ROCHERS_INIT; ++i) 
         monde.spawnRocher({static_cast<float>(rand() % larg), static_cast<float>(rand() % haut)});
     
-    for (int i = 0; i < 50; ++i) 
+    for (int i = 0; i < Constantes::NB_ALGUES_INIT; ++i) 
         monde.spawnAlgue({static_cast<float>(rand() % larg), static_cast<float>(rand() % haut)});
     
-    for (int i = 0; i < 5; ++i) 
+    for (int i = 0; i < Constantes::NB_BACTERIES_INIT; ++i) 
         monde.spawnBacterie({static_cast<float>(rand() % larg), static_cast<float>(rand() % haut)});
 }
 
 int main() {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    sf::RenderWindow window(sf::VideoMode({1280u, 720u}), "Spore Simulation");
-    window.setFramerateLimit(60);
+    sf::RenderWindow window(sf::VideoMode({
+        static_cast<unsigned int>(Constantes::FENETRE_LARGEUR), 
+        static_cast<unsigned int>(Constantes::FENETRE_HAUTEUR)
+    }), "Spore Simulation");
+    
+    window.setFramerateLimit(Constantes::FPS_LIMITE);
 
-    sf::Vector2f tailleInitiale(1280.f, 720.f);
+    sf::Vector2f tailleInitiale(Constantes::FENETRE_LARGEUR, Constantes::FENETRE_HAUTEUR);
     Monde monde(sf::FloatRect({0.f, 0.f}, tailleInitiale));    
 
     Rendu rendu;
@@ -70,7 +74,7 @@ int main() {
 
             if (const auto* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>()) {
                 sf::Vector2f clicPos = window.mapPixelToCoords(mouseEvent->position);
-                float menuX = window.getView().getSize().x - 380.f;
+                float menuX = window.getView().getSize().x - Constantes::MENU_LARGEUR;
                 if (clicPos.x < menuX) {
                     if (mouseEvent->button == sf::Mouse::Button::Left) 
                         monde.spawnAlgue(clicPos);
@@ -87,7 +91,7 @@ int main() {
         window.clear(sf::Color::Black);
         
         sf::RectangleShape zoneJeu(monde.getLimites().size);
-        zoneJeu.setFillColor(sf::Color(10, 30, 50));
+        zoneJeu.setFillColor(Constantes::COULEUR_ZONE_JEU);
         zoneJeu.setOutlineColor(sf::Color::White);
         zoneJeu.setOutlineThickness(2.f);
         window.draw(zoneJeu);

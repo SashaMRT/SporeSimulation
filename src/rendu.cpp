@@ -1,3 +1,10 @@
+#include "rendu.hpp"
+#include "constantes.hpp"
+#include <cmath>
+#include <algorithm>
+#include <iomanip>
+#include <sstream>
+
 Rendu::Rendu() : 
     titre(font),
     inspection(font),
@@ -13,7 +20,7 @@ Rendu::Rendu() :
     nomStat(font),
     valeurStat(font)
 {
-    fond.setFillColor(sf::Color(25, 25, 30, 230));
+    fond.setFillColor(Constantes::COULEUR_FOND_MENU);
     fond.setOutlineThickness(-2.f);
     fond.setOutlineColor(sf::Color(100, 100, 100));
 }
@@ -35,9 +42,9 @@ bool Rendu::init(const std::string& cheminFont) {
 
     if (!fontChargee) return false;
 
-    titre.setString("SPORE SIMULATION");
+    titre.setString("SPORE SIM");
     titre.setCharacterSize(28);
-    titre.setFillColor(sf::Color::White);
+    titre.setFillColor(Constantes::COULEUR_TITRE);
     titre.setStyle(sf::Text::Bold);
     
     sf::FloatRect limitesTitre = titre.getLocalBounds();
@@ -75,11 +82,11 @@ bool Rendu::init(const std::string& cheminFont) {
         "a l'oeuvre !"
     );
     description.setCharacterSize(15);
-    description.setFillColor(sf::Color(150, 150, 150));
+    description.setFillColor(Constantes::COULEUR_TEXTE_GRIS);
 
     controles.setString("Controles :");
     controles.setCharacterSize(16);
-    controles.setFillColor(sf::Color(200, 200, 200));
+    controles.setFillColor(Constantes::COULEUR_TEXTE_CLAIR);
     controles.setStyle(sf::Text::Bold);
 
     controlesGauche.setString(
@@ -88,7 +95,7 @@ bool Rendu::init(const std::string& cheminFont) {
         "Clic Droit : + Bacterie"
     );
     controlesGauche.setCharacterSize(14);
-    controlesGauche.setFillColor(sf::Color(150, 150, 150));
+    controlesGauche.setFillColor(Constantes::COULEUR_TEXTE_GRIS);
 
     controlesDroite.setString(
         "P : Pause\n"
@@ -96,7 +103,7 @@ bool Rendu::init(const std::string& cheminFont) {
         "Echap : Quitter"
     );
     controlesDroite.setCharacterSize(14);
-    controlesDroite.setFillColor(sf::Color(150, 150, 150));
+    controlesDroite.setFillColor(Constantes::COULEUR_TEXTE_GRIS);
 
     alerte.setString("Agrandir fenetre\npour plus d'infos");
     alerte.setCharacterSize(16);
@@ -129,13 +136,13 @@ void Rendu::menu(const Monde& monde, sf::RenderTarget& cible, bool enPause, floa
 
     float fenetreX = centreFenetre.x - tailleFenetre.x / 2.f;
     float fenetreY = centreFenetre.y - tailleFenetre.y / 2.f;
-    float menuX = fenetreX + tailleFenetre.x - 380.f;
+    float menuX = fenetreX + tailleFenetre.x - Constantes::MENU_LARGEUR;
 
     bool afficherControles = tailleFenetre.y > 600.f;
     bool afficherDescription = tailleFenetre.y > 700.f;
 
     fond.setPosition({menuX, fenetreY});
-    fond.setSize({380.f, tailleFenetre.y});
+    fond.setSize({Constantes::MENU_LARGEUR, tailleFenetre.y});
     cible.draw(fond);
 
     infoFps.setString("FPS : " + std::to_string(static_cast<int>(fps)));
@@ -161,10 +168,10 @@ void Rendu::menu(const Monde& monde, sf::RenderTarget& cible, bool enPause, floa
 
     Stats statistiques = monde.getStats();
     float debutStatsY = fenetreY + 130.f;
-    dessinerLigneStat(cible, "Algues", statistiques.algues, sf::Color(50, 255, 50), menuX, debutStatsY);
-    dessinerLigneStat(cible, "Bacteries", statistiques.bacteries, sf::Color(0, 255, 255), menuX, debutStatsY + 50.f);
-    dessinerLigneStat(cible, "Herbivores", statistiques.herbivores, sf::Color(150, 255, 100), menuX, debutStatsY + 100.f);
-    dessinerLigneStat(cible, "Carnivores", statistiques.carnivores, sf::Color(255, 50, 50), menuX, debutStatsY + 150.f);
+    dessinerLigneStat(cible, "Algues", statistiques.algues, Constantes::ALGUE_COULEUR, menuX, debutStatsY);
+    dessinerLigneStat(cible, "Bacteries", statistiques.bacteries, Constantes::BACTERIE_COULEUR, menuX, debutStatsY + 50.f);
+    dessinerLigneStat(cible, "Herbivores", statistiques.herbivores, Constantes::HERBIVORE_COULEUR_LENT, menuX, debutStatsY + 100.f);
+    dessinerLigneStat(cible, "Carnivores", statistiques.carnivores, Constantes::CARNIVORE_COULEUR, menuX, debutStatsY + 150.f);
 
     if (survol != nullptr) {
         if (tailleFenetre.y > 350.f) {
@@ -175,10 +182,10 @@ void Rendu::menu(const Monde& monde, sf::RenderTarget& cible, bool enPause, floa
             sf::Color typeCol = sf::Color::White;
 
             switch(survol->getType()) {
-                case TypeEntite::ALGUE: typeStr = "Algue"; typeCol = sf::Color::Green; break;
-                case TypeEntite::BACTERIE: typeStr = "Bacterie"; typeCol = sf::Color::Cyan; break;
-                case TypeEntite::HERBIVORE: typeStr = "Herbivore"; typeCol = sf::Color(150, 255, 100); break;
-                case TypeEntite::CARNIVORE: typeStr = "Carnivore"; typeCol = sf::Color::Red; break;
+                case TypeEntite::ALGUE: typeStr = "Algue"; typeCol = Constantes::ALGUE_COULEUR; break;
+                case TypeEntite::BACTERIE: typeStr = "Bacterie"; typeCol = Constantes::BACTERIE_COULEUR; break;
+                case TypeEntite::HERBIVORE: typeStr = "Herbivore"; typeCol = Constantes::HERBIVORE_COULEUR_LENT; break;
+                case TypeEntite::CARNIVORE: typeStr = "Carnivore"; typeCol = Constantes::CARNIVORE_COULEUR; break;
                 default: break;
             }
 

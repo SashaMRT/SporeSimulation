@@ -1,15 +1,10 @@
 Rocher::Rocher(sf::Vector2f pos) 
-    : Entite(pos, TypeEntite::ROCHER, 25.f + (rand() % 20), 1000.f) {
-}
+    : Entite(pos, TypeEntite::ROCHER, 
+             Constantes::ROCHER_RAYON_BASE + (rand() % 20), 
+             Constantes::ROCHER_ENERGIE), 
+      occupe(false) {}
 
 void Rocher::update(float dt, Monde& monde) {
-    static float timer = 0.f;
-    timer += dt;
-    
-    if (occupe && timer > 1.0f) { 
-        timer = 0.f;
-        bool herbivoreToujoursLa = false;
-    }
 }
 
 void Rocher::dessiner(sf::RenderTarget& cible) const {

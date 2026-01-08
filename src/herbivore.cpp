@@ -1,5 +1,11 @@
+#include "herbivore.hpp"
+#include "monde.hpp"
+#include "constantes.hpp"
+#include <cmath>
+#include <algorithm>
+
 Herbivore::Herbivore(sf::Vector2f pos, float vitesse, float taille, float vue) 
-    : Entite(pos, TypeEntite::HERBIVORE, taille, 100.f),
+    : Entite(pos, TypeEntite::HERBIVORE, taille, Constantes::HERBIVORE_ENERGIE_BASE),
       vitesseMax(vitesse), porteeVue(vue), invisible(false), 
       chronoCache(0.f), chronoRecharge(0.f), isRapide(vitesse > 120.f) 
 {    
@@ -80,7 +86,9 @@ void Herbivore::update(float dt, Monde& monde) {
                     vitesse = (fuite / distDanger) * (vitesseMax * 1.2f);
                 }
             } else {
-                vitesse = {vitesseMax, 0.f};
+                // CORRECTION ICI : Si on est pile sur le danger, on choisit une direction au hasard
+                float angleHasard = (rand() % 360) * 3.14159f / 180.f;
+                vitesse = sf::Vector2f(std::cos(angleHasard), std::sin(angleHasard)) * (vitesseMax * 1.2f);
             }
             enFuite = true;
             energie -= 5.f * dt;
@@ -106,25 +114,10 @@ void Herbivore::update(float dt, Monde& monde) {
     position += vitesse * dt;
 
     sf::FloatRect limites = monde.getLimites();
-
-    if (position.x < limites.position.x) { 
-        position.x = limites.position.x; 
-        vitesse.x = std::abs(vitesse.x); 
-    }
-    if (position.x > limites.size.x) { 
-        position.x = limites.size.x; 
-        vitesse.x = -std::abs(vitesse.x); 
-    }
-
-    if (position.y < limites.position.y) { 
-        position.y = limites.position.y; 
-        vitesse.y = std::abs(vitesse.y); 
-    }
-
-    if (position.y > limites.size.y) { 
-        position.y = limites.size.y; 
-        vitesse.y = -std::abs(vitesse.y); 
-    }
+    if (position.x < limites.position.x) { position.x = limites.position.x; vitesse.x = std::abs(vitesse.x); }
+    if (position.x > limites.size.x) { position.x = limites.size.x; vitesse.x = -std::abs(vitesse.x); }
+    if (position.y < limites.position.y) { position.y = limites.position.y; vitesse.y = std::abs(vitesse.y); }
+    if (position.y > limites.size.y) { position.y = limites.size.y; vitesse.y = -std::abs(vitesse.y); }
 
     float coutMetabolique = (rayon * 0.1f) + (vitesseMax * 0.02f);
     energie -= coutMetabolique * dt;

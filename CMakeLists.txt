@@ -56,6 +56,7 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE
     <SFML/Window.hpp>
     <SFML/System.hpp>
 
+    "include/constantes.hpp"
     "include/entite.hpp"
     "include/particule.hpp"
     "include/algue.hpp"
