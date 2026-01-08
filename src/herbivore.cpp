@@ -71,7 +71,10 @@ void Herbivore::update(float dt, Monde& monde) {
 void Herbivore::dessiner(sf::RenderTarget& cible) const {
     if (invisible) return;
 
-    float angle = std::atan2(vitesse.y, vitesse.x);
+    float angle = 0.f;
+    if (std::abs(vitesse.x) > 0.1f || std::abs(vitesse.y) > 0.1f) {
+        angle = std::atan2(vitesse.y, vitesse.x);
+    }
     sf::Color couleur = isRapide ? sf::Color(0, 191, 255, 200) : sf::Color(50, 220, 100, 200);
 
     int nbTentacules = isRapide ? 3 : 5;

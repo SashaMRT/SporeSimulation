@@ -11,6 +11,10 @@ Monde::Monde(sf::FloatRect limites)
     : limites(limites) {
 }
 
+void Monde::setTaille(sf::Vector2f taille) {
+    limites.size = taille;
+}
+
 void Monde::update(float dt) {
     std::vector<std::unique_ptr<Entite>> nouveau;
 
@@ -19,14 +23,25 @@ void Monde::update(float dt) {
 
         e->update(dt, *this);
 
+        sf::Vector2f pos = e->getPosition();
+        if (pos.x < 0) e->setPosition({0.f, pos.y});
+        if (pos.y < 0) e->setPosition({pos.x, 0.f});
+        if (pos.x > limites.size.x) e->setPosition({limites.size.x, pos.y});
+        if (pos.y > limites.size.y) e->setPosition({pos.x, limites.size.y});
+
         if (e->getType() != TypeEntite::ROCHER) {
             for (auto& r : entites) {
                 if (r->getType() == TypeEntite::ROCHER) {
                     sf::Vector2f diff = e->getPosition() - r->getPosition();
                     float dist = std::hypot(diff.x, diff.y);
                     float min = e->getRayon() + r->getRayon();
+                    
                     if (dist < min) {
-                        e->setPosition(r->getPosition() + (diff / dist) * min);
+                        if (dist > 0.001f) {
+                            e->setPosition(r->getPosition() + (diff / dist) * min);
+                        } else {
+                            e->setPosition(r->getPosition() + sf::Vector2f(min, 0.f));
+                        }
                     }
                 }
             }

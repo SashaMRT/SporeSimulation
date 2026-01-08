@@ -13,5 +13,5 @@ private:
     sf::RectangleShape fond;
     sf::Text titre;
 
-    void dessinerLigneStat(sf::RenderTarget& cible, const std::string& nomEspece, int valeur, sf::Color couleur, float y) const;
+    void dessinerLigneStat(sf::RenderTarget& cible, const std::string& nomEspece, int valeur, sf::Color couleur, float x, float y) const;
 };

@@ -30,7 +30,9 @@ void Carnivore::update(float dt, Monde& monde) {
         sf::Vector2f direction = proie->getPosition() - position;
         float distance = std::hypot(direction.x, direction.y);
         
-        vitesse = (direction / distance) * ((isAlpha ? 90.f : 130.f) * boostMeute);
+        if (distance > 0.001f) {
+            vitesse = (direction / distance) * ((isAlpha ? 90.f : 130.f) * boostMeute);
+        }
 
         if (distance < rayon + proie->getRayon()) {
             energie += isAlpha ? 80.f : 50.f;
@@ -41,8 +43,26 @@ void Carnivore::update(float dt, Monde& monde) {
     position += vitesse * dt;
 
     sf::FloatRect limites = monde.getLimites();
-    if (position.x < limites.position.x || position.x > limites.size.x) vitesse.x *= -1;
-    if (position.y < limites.position.y || position.y > limites.size.y) vitesse.y *= -1;
+
+    if (position.x < limites.position.x) { 
+        position.x = limites.position.x; 
+        vitesse.x = std::abs(vitesse.x); 
+    }
+
+    if (position.x > limites.size.x) { 
+        position.x = limites.size.x; 
+        vitesse.x = -std::abs(vitesse.x); 
+    }
+
+    if (position.y < limites.position.y) { 
+        position.y = limites.position.y; 
+        vitesse.y = std::abs(vitesse.y); 
+    }
+
+    if (position.y > limites.size.y) { 
+        position.y = limites.size.y; 
+        vitesse.y = -std::abs(vitesse.y); 
+    }
 
     energie -= (isAlpha ? 12.f : 8.f) * dt;
     if (energie <= 0) tuer();
