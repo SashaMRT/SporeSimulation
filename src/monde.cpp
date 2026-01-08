@@ -56,7 +56,8 @@ void Monde::update(float dt) {
         if (rand() % 5000 == 0) {
             float x = static_cast<float>(rand() % static_cast<int>(limites.size.x));
             float y = static_cast<float>(rand() % static_cast<int>(limites.size.y));
-            spawnAlgue({x, y});
+            nouveau.push_back(std::make_unique<Algue>(sf::Vector2f(x, y)));
+            naissancesAlgues++;
         }
 
         // Si l'entité est morte, on passe à la suivante (elle sera nettoyée plus tard)
