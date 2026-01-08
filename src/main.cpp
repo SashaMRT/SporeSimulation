@@ -92,6 +92,7 @@ int main() {
         zoneJeu.setOutlineThickness(2.f);
         window.draw(zoneJeu);
         
+        monde.dessinerFond(window);
         monde.dessiner(window);
 
         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);

@@ -23,37 +23,66 @@ float muter(float valeur) {
 void Monde::update(float dt) {
     std::vector<std::unique_ptr<Entite>> nouveau;
 
-    for (auto& e : entites) {
-        if (!e->estVivante()) continue;
+    for (auto& ent : entites) {
+        if (!ent->estVivante()) {
+            sf::Color couleurParticule = sf::Color::White;
 
-        e->update(dt, *this);
+            switch(ent->getType()) {
+                case TypeEntite::ALGUE:
+                    couleurParticule = sf::Color(34, 139, 34);
+                    break;
+                case TypeEntite::BACTERIE:
+                    couleurParticule = sf::Color(0, 255, 255);
+                    break;
+                case TypeEntite::HERBIVORE: {
+                    Herbivore* h = static_cast<Herbivore*>(ent.get());
+                    couleurParticule = h->estRapide() ? sf::Color(0, 191, 255) : sf::Color(50, 220, 100);
+                    libererRocherProche(ent->getPosition());
+                    break;
+                }
+                case TypeEntite::CARNIVORE:
+                    couleurParticule = sf::Color(255, 50, 50);
+                    break;
+                default:
+                    continue;
+            }
 
-        sf::Vector2f pos = e->getPosition();
-        if (pos.x < 0) e->setPosition({0.f, pos.y});
-        if (pos.y < 0) e->setPosition({pos.x, 0.f});
-        if (pos.x > limites.size.x) e->setPosition({limites.size.x, pos.y});
-        if (pos.y > limites.size.y) e->setPosition({pos.x, limites.size.y});
+            int nbParticules = static_cast<int>(ent->getRayon() * 1.5f);
+            nbParticules = std::clamp(nbParticules, 5, 30);
+            
+            creerExplosion(ent->getPosition(), couleurParticule, nbParticules);
+            continue;
+        }
 
-        if (e->getType() != TypeEntite::ROCHER) {
+        ent->update(dt, *this);
+
+        sf::Vector2f pos = ent->getPosition();
+        if (pos.x < 0) ent->setPosition({0.f, pos.y});
+        if (pos.y < 0) ent->setPosition({pos.x, 0.f});
+        if (pos.x > limites.size.x) ent->setPosition({limites.size.x, pos.y});
+        if (pos.y > limites.size.y) ent->setPosition({pos.x, limites.size.y});
+
+        if (ent->getType() != TypeEntite::ROCHER) {
             for (auto& r : entites) {
                 if (r->getType() == TypeEntite::ROCHER) {
-                    sf::Vector2f diff = e->getPosition() - r->getPosition();
+                    sf::Vector2f diff = ent->getPosition() - r->getPosition();
                     float dist = std::hypot(diff.x, diff.y);
-                    float min = e->getRayon() + r->getRayon();
+                    float min = ent->getRayon() + r->getRayon();
                     
                     if (dist < min) {
                         if (dist > 0.001f) {
-                            e->setPosition(r->getPosition() + (diff / dist) * min);
+                            ent->setPosition(r->getPosition() + (diff / dist) * min);
                         } else {
-                            e->setPosition(r->getPosition() + sf::Vector2f(min, 0.f));
+                            ent->setPosition(r->getPosition() + sf::Vector2f(min, 0.f));
                         }
                     }
                 }
             }
         }
 
-        if (e->estVivante() && e->getType() == TypeEntite::BACTERIE && e->getEnergie() >= 110.f) {
-            e->tuer();
+        if (ent->estVivante() && ent->getType() == TypeEntite::BACTERIE && ent->getEnergie() >= 110.f) {
+            creerExplosion(ent->getPosition(), sf::Color(255, 215, 0), 20);
+            ent->tuer();
 
             int choix = rand() % 100;
 
@@ -61,52 +90,60 @@ void Monde::update(float dt) {
                 int sousChoix = rand() % 3;
                 
                 if (sousChoix == 0) {
-                    nouveau.push_back(std::make_unique<Herbivore>(e->getPosition(), 90.f, 15.f, 150.f));
+                    nouveau.push_back(std::make_unique<Herbivore>(ent->getPosition(), 90.f, 15.f, 150.f));
                 } 
                 else if (sousChoix == 1) {
-                    nouveau.push_back(std::make_unique<Herbivore>(e->getPosition(), 140.f, 10.f, 250.f));
+                    nouveau.push_back(std::make_unique<Herbivore>(ent->getPosition(), 140.f, 10.f, 250.f));
                 }
                 else {
-                    nouveau.push_back(std::make_unique<Herbivore>(e->getPosition(), 60.f, 25.f, 300.f));
+                    nouveau.push_back(std::make_unique<Herbivore>(ent->getPosition(), 60.f, 25.f, 300.f));
                 }
             } 
             else { 
                 int sousChoix = rand() % 3;
 
                 if (sousChoix == 0) {
-                    nouveau.push_back(std::make_unique<Carnivore>(e->getPosition(), 110.f, 20.f, 200.f));
+                    nouveau.push_back(std::make_unique<Carnivore>(ent->getPosition(), 110.f, 20.f, 200.f));
                 } 
                 else if (sousChoix == 1) {
-                    nouveau.push_back(std::make_unique<Carnivore>(e->getPosition(), 145.f, 25.f, 350.f));
+                    nouveau.push_back(std::make_unique<Carnivore>(ent->getPosition(), 145.f, 25.f, 350.f));
                 }
                 else {
-                    nouveau.push_back(std::make_unique<Carnivore>(e->getPosition(), 160.f, 12.f, 250.f));
+                    nouveau.push_back(std::make_unique<Carnivore>(ent->getPosition(), 160.f, 12.f, 250.f));
                 }
             }
         }
 
-        if (e->estVivante() && e->getEnergie() >= 200.f) {
-            if (e->getType() == TypeEntite::HERBIVORE) {
-                Herbivore* parent = dynamic_cast<Herbivore*>(e.get());
-                e->setEnergie(60.f);
+        if (ent->estVivante() && ent->getEnergie() >= 200.f) {
+            if (ent->getType() == TypeEntite::HERBIVORE) {
+                creerExplosion(ent->getPosition(), sf::Color(100, 255, 150), 15);
+                Herbivore* parent = dynamic_cast<Herbivore*>(ent.get());
+                ent->setEnergie(60.f);
                 
                 float vitesse = muter(parent->getVitesseMax());
                 float rayon = muter(parent->getRayon());
                 float vision = muter(parent->getPorteeVue());
                 
-                nouveau.push_back(std::make_unique<Herbivore>(e->getPosition() + sf::Vector2f(10.f, 10.f), vitesse, rayon, vision));
+                nouveau.push_back(std::make_unique<Herbivore>(ent->getPosition() + sf::Vector2f(10.f, 10.f), vitesse, rayon, vision));
             }
-            else if (e->getType() == TypeEntite::CARNIVORE) {
-                Carnivore* parent = dynamic_cast<Carnivore*>(e.get());
-                e->setEnergie(60.f);
+            else if (ent->getType() == TypeEntite::CARNIVORE) {
+                creerExplosion(ent->getPosition(), sf::Color(255, 100, 100), 15);
+                Carnivore* parent = dynamic_cast<Carnivore*>(ent.get());
+                ent->setEnergie(60.f);
                 
                 float vitesse = muter(parent->getVitesseMax());
                 float rayon = muter(parent->getRayon());
                 float vision = muter(parent->getPorteeVue());
 
-                nouveau.push_back(std::make_unique<Carnivore>(e->getPosition() + sf::Vector2f(10.f, 10.f), vitesse, rayon, vision));
+                nouveau.push_back(std::make_unique<Carnivore>(ent->getPosition() + sf::Vector2f(10.f, 10.f), vitesse, rayon, vision));
             }
         }
+    }
+
+    for (auto it = particules.begin(); it != particules.end();) {
+        it->update(dt);
+        if (it->vie <= 0) it = particules.erase(it);
+        else ++it;
     }
 
     remove();
@@ -118,6 +155,10 @@ void Monde::dessiner(sf::RenderTarget& cible) const {
         if (e->estVivante()) {
             e->dessiner(cible);
         }
+    }
+
+    for (const auto& p : particules) {
+        p.dessiner(cible);
     }
 }
 
@@ -159,7 +200,7 @@ bool Monde::estCache(sf::Vector2f pos) const {
                 sf::Vector2f diff = pos - e->getPosition();
                 float dist = std::hypot(diff.x, diff.y);
                 if (dist < e->getRayon() + 20.f) {
-                    r->setOccupe(true);
+                    const_cast<Rocher*>(r)->setOccupe(true);
                     return true;
                 }
             }
@@ -173,12 +214,50 @@ void Monde::libererRocherProche(sf::Vector2f pos) {
         if (e->getType() == TypeEntite::ROCHER) {
             float d = std::hypot(e->getPosition().x - pos.x, e->getPosition().y - pos.y);
             if (d < e->getRayon() + 25.f) {
-                static_cast<Rocher*>(e.get())->setOccupe(false); //
+                static_cast<Rocher*>(e.get())->setOccupe(false);
                 return;
             }
         }
     }
 }
+
+void Monde::creerExplosion(sf::Vector2f pos, sf::Color couleur, int nb) {
+    for (int i = 0; i < nb; ++i) {
+        float angle = (rand() % 360) * 3.14159f / 180.f;
+        float vitesse = (rand() % 80) + 30.f;
+        float variationCouleur = (rand() % 40) - 20;
+        
+        sf::Color couleurVar = couleur;
+        if (couleur.r + variationCouleur >= 0 && couleur.r + variationCouleur <= 255)
+            couleurVar.r += variationCouleur;
+        if (couleur.g + variationCouleur >= 0 && couleur.g + variationCouleur <= 255)
+            couleurVar.g += variationCouleur;
+        if (couleur.b + variationCouleur >= 0 && couleur.b + variationCouleur <= 255)
+            couleurVar.b += variationCouleur;
+        
+        sf::Vector2f vit(std::cos(angle) * vitesse, std::sin(angle) * vitesse);
+        particules.push_back(Particule(pos, vit, couleurVar));
+    }
+}
+
+void Monde::dessinerFond(sf::RenderTarget& cible) const {
+    sf::Vector2f taille = limites.size;
+
+    sf::VertexArray degrade(sf::PrimitiveType::TriangleStrip, 4);
+
+    degrade[0].position = {0, 0};
+    degrade[0].color = sf::Color(0, 105, 148);
+    degrade[2].position = {taille.x, 0};
+    degrade[2].color = sf::Color(0, 105, 148);
+
+    degrade[1].position = {0, taille.y};
+    degrade[1].color = sf::Color(2, 12, 27);
+    degrade[3].position = {taille.x, taille.y};
+    degrade[3].color = sf::Color(2, 12, 27);
+
+    cible.draw(degrade);
+}
+
 void Monde::reset() {
     entites.clear();
 }

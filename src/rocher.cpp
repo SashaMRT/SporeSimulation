@@ -4,7 +4,15 @@
 Rocher::Rocher(sf::Vector2f pos) 
     : Entite(pos, TypeEntite::ROCHER, 25.f + (rand() % 20), 1000.f) {
 }
+
 void Rocher::update(float dt, Monde& monde) {
+    static float timer = 0.f;
+    timer += dt;
+    
+    if (occupe && timer > 1.0f) { 
+        timer = 0.f;
+        bool herbivoreToujoursLa = false;
+    }
 }
 
 void Rocher::dessiner(sf::RenderTarget& cible) const {
@@ -17,14 +25,22 @@ void Rocher::dessiner(sf::RenderTarget& cible) const {
     forme.setPoint(5, {0.3f, -rayon});
 
     forme.setPosition(position);
-    forme.setFillColor(sf::Color(80, 80, 90));
+    
+    if (occupe) {
+        forme.setFillColor(sf::Color(40, 40, 45));
+    } else {
+        forme.setFillColor(sf::Color(80, 80, 90));
+    }
+    
     forme.setOutlineThickness(2.f);
     forme.setOutlineColor(sf::Color(50, 50, 55));
     
     cible.draw(forme);
 
-    sf::CircleShape reflet(rayon * 0.3f);
-    reflet.setPosition(position - sf::Vector2f(rayon*0.4f, rayon*0.4f));
-    reflet.setFillColor(sf::Color(120, 120, 130, 100));
-    cible.draw(reflet);
+    if (!occupe) {
+        sf::CircleShape reflet(rayon * 0.3f);
+        reflet.setPosition(position - sf::Vector2f(rayon*0.4f, rayon*0.4f));
+        reflet.setFillColor(sf::Color(120, 120, 130, 100));
+        cible.draw(reflet);
+    }
 }

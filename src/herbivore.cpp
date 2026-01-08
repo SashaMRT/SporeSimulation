@@ -6,7 +6,7 @@
 Herbivore::Herbivore(sf::Vector2f pos, float vitesse, float taille, float vue) 
     : Entite(pos, TypeEntite::HERBIVORE, taille, 100.f),
       vitesseMax(vitesse), porteeVue(vue), invisible(false), 
-      chronoCache(0.f), chronoRecharge(0.f) 
+      chronoCache(0.f), chronoRecharge(0.f), isRapide(vitesse > 120.f) 
 {    
     float angle = (rand() % 360) * 3.14159f / 180.f;
     this->vitesse = sf::Vector2f(std::cos(angle), std::sin(angle)) * vitesseMax;
@@ -21,11 +21,21 @@ void Herbivore::update(float dt, Monde& monde) {
             invisible = false;
             chronoCache = 0.f;
             chronoRecharge = 20.f;
+            monde.libererRocherProche(position);
         }
         return;
     }
 
-    if (chronoRecharge <= 0.f && monde.estCache(position)) {
+    Entite* danger = monde.getPlusProche(position, TypeEntite::CARNIVORE);
+    bool dangerProche = false;
+    
+    if (danger) {
+        float distDanger = std::hypot(danger->getPosition().x - position.x, 
+                                      danger->getPosition().y - position.y);
+        dangerProche = (distDanger < porteeVue * 0.7f);
+    }
+
+    if (chronoRecharge <= 0.f && dangerProche && monde.estCache(position)) {
         invisible = true;
         return;
     }
@@ -40,18 +50,40 @@ void Herbivore::update(float dt, Monde& monde) {
         }
     }
 
-    Entite* danger = monde.getPlusProche(position, TypeEntite::CARNIVORE);
     Entite* nourriture = monde.getPlusProche(position, TypeEntite::ALGUE);
 
     bool enFuite = false;
 
-    if (danger) {
+    if (danger && dangerProche) {
         sf::Vector2f fuite = position - danger->getPosition();
         float distDanger = std::hypot(fuite.x, fuite.y);
 
         if (distDanger < vueEffective) {
             if (distDanger > 0.001f) {
-                vitesse = (fuite / distDanger) * (vitesseMax * 1.2f);
+                sf::FloatRect limites = monde.getLimites();
+                sf::Vector2f centreMonde = {limites.size.x / 2.f, limites.size.y / 2.f};
+                sf::Vector2f versCentre = centreMonde - position;
+                float distVersCentre = std::hypot(versCentre.x, versCentre.y);
+                
+                if (distVersCentre > 0.001f) {
+                    versCentre /= distVersCentre;
+                    
+                    float angleFuite = std::atan2(fuite.y, fuite.x);
+                    float angleVersCentre = std::atan2(versCentre.y, versCentre.x);
+                    
+                    float differenceAngle = angleVersCentre - angleFuite;
+                    while (differenceAngle > 3.14159f) differenceAngle -= 2 * 3.14159f;
+                    while (differenceAngle < -3.14159f) differenceAngle += 2 * 3.14159f;
+                    
+                    float poidsVersCentre = 0.3f;
+                    float angleFinal = angleFuite + differenceAngle * poidsVersCentre;
+                    
+                    vitesse.x = std::cos(angleFinal);
+                    vitesse.y = std::sin(angleFinal);
+                    vitesse = vitesse * (vitesseMax * 1.2f);
+                } else {
+                    vitesse = (fuite / distDanger) * (vitesseMax * 1.2f);
+                }
             } else {
                 vitesse = {vitesseMax, 0.f};
             }
