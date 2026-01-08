@@ -46,11 +46,26 @@ int main() {
                     enPause = false; 
                 }
             }
+
+            if (const auto* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>()) {
+                sf::Vector2f clicPos = window.mapPixelToCoords(mouseEvent->position);
+                if (clicPos.x < 900.f) {
+                    if (mouseEvent->button == sf::Mouse::Button::Left) 
+                        monde.spawnAlgue(clicPos);
+                    else if (mouseEvent->button == sf::Mouse::Button::Right) 
+                        monde.spawnBacterie(clicPos);
+                }
+            }
         }
 
         if (!enPause) {
             monde.update(dt);
         }
+
+        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+
+        Entite* entiteSurvolee = monde.getEntiteSousSouris(worldPos);
 
         window.clear(sf::Color::Black);
         
@@ -59,8 +74,18 @@ int main() {
         window.draw(zoneJeu);
         
         monde.dessiner(window);
+
+        if (entiteSurvolee) {
+            sf::CircleShape curseur(25.f);
+            curseur.setOrigin({25.f, 25.f});
+            curseur.setPosition(entiteSurvolee->getPosition());
+            curseur.setFillColor(sf::Color::Transparent);
+            curseur.setOutlineThickness(2.f);
+            curseur.setOutlineColor(sf::Color::Yellow);
+            window.draw(curseur);
+        }
         
-        rendu.menu(monde, window, enPause);
+        rendu.menu(monde, window, enPause, entiteSurvolee);
         
         window.display();
     }

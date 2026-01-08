@@ -35,7 +35,7 @@ bool Rendu::init(const std::string& nomFichier) {
     return false;
 }
 
-void Rendu::menu(const Monde& monde, sf::RenderTarget& cible, bool enPause) {
+void Rendu::menu(const Monde& monde, sf::RenderTarget& cible, bool enPause, const Entite* survol) {
     cible.draw(fond);
     cible.draw(titre);
 
@@ -50,14 +50,40 @@ void Rendu::menu(const Monde& monde, sf::RenderTarget& cible, bool enPause) {
     dessinerLigneStat(cible, "Herbivores", statistiques.nbHerbivores, sf::Color(150, 255, 100), 220.f);
     dessinerLigneStat(cible, "Carnivores", statistiques.nbCarnivores, sf::Color(255, 50, 50), 270.f);
 
-    sf::Text description(font);
-    if (enPause) {
-        description.setString("--- PAUSE ---");
-        description.setFillColor(sf::Color::Yellow);
-        description.setStyle(sf::Text::Bold);
-        description.setCharacterSize(20);
-        description.setPosition({940.f, 350.f});
-    } else {
+    if (survol != nullptr) {
+        sf::Text infos(font, "--- INSPECTION ---", 18);
+        infos.setFillColor(sf::Color::Yellow);
+        infos.setPosition({940.f, 340.f});
+        cible.draw(infos);
+
+        std::string typeStr = "Inconnu";
+        sf::Color typeCol = sf::Color::White;
+        
+        switch(survol->getType()) {
+            case TypeEntite::ALGUE: typeStr = "Algue"; typeCol = sf::Color::Green; break;
+            case TypeEntite::BACTERIE: typeStr = "Bacterie"; typeCol = sf::Color::Cyan; break;
+            case TypeEntite::HERBIVORE: typeStr = "Herbivore"; typeCol = sf::Color(150, 255, 100); break;
+            case TypeEntite::CARNIVORE: typeStr = "Carnivore"; typeCol = sf::Color::Red; break;
+        }
+
+        std::string info = "Type : " + typeStr + "\n";
+        info += "ID : " + std::to_string(survol->getId()) + "\n";
+        info += "Energie : " + std::to_string((int)survol->getEnergie());
+
+        sf::Text details(font, info, 16);
+        details.setFillColor(typeCol);
+        details.setPosition({940.f, 370.f});
+        cible.draw(details);
+    } 
+    else if (enPause) {
+        sf::Text pause(font, "--- PAUSE ---", 20);
+        pause.setFillColor(sf::Color::Yellow); 
+        pause.setStyle(sf::Text::Bold);
+        pause.setPosition({940.f, 350.f});
+        cible.draw(pause);
+    } 
+    else {
+        sf::Text description(font);
         description.setString(
             "Bienvenue dans le Micro-Monde.\n\n"
             "Tout commence par des bacteries.\n"
@@ -68,19 +94,40 @@ void Rendu::menu(const Monde& monde, sf::RenderTarget& cible, bool enPause) {
             "predateurs carnivores (rouge).\n\n"
             "Observez la selection naturelle\n"
             "a l'oeuvre !"
-        );
-        description.setFillColor(sf::Color(180, 180, 180));
+        );        
         description.setCharacterSize(15);
+        description.setFillColor(sf::Color(150, 150, 150));
         description.setPosition({940.f, 330.f});
+        cible.draw(description);
     }
-    cible.draw(description);
 
-    sf::Text controles(font); 
-    controles.setString("Controles:\nP : Pause/Reprise\nR : Restart\nECHAP : Quitter");
-    controles.setCharacterSize(14);
-    controles.setFillColor(sf::Color(150, 150, 150));
-    controles.setPosition({940.f, 600.f});
-    cible.draw(controles);
+    sf::Text Controles(font, "Controles :", 16);
+    Controles.setFillColor(sf::Color(200, 200, 200));
+    Controles.setStyle(sf::Text::Bold);
+    Controles.setPosition({940.f, 620.f});
+    cible.draw(Controles);
+
+    sf::Text colGauche(font);
+    colGauche.setString(
+        "Survoler : Infos\n"
+        "Clic Gauche : + Algue\n"
+        "Clic Droit : + Bacterie"
+    );
+    colGauche.setCharacterSize(14);
+    colGauche.setFillColor(sf::Color(150, 150, 150));
+    colGauche.setPosition({940.f, 650.f}); 
+    cible.draw(colGauche);
+
+    sf::Text colDroite(font);
+    colDroite.setString(
+        "P : Pause\n"
+        "R : Restart\n"
+        "Echap : Quitter"
+    );
+    colDroite.setCharacterSize(14);
+    colDroite.setFillColor(sf::Color(150, 150, 150));
+    colDroite.setPosition({1120.f, 650.f}); 
+    cible.draw(colDroite);
 }
 
 void Rendu::dessinerLigneStat(sf::RenderTarget& cible, const std::string& label, int quantite, sf::Color couleur, float y) const {

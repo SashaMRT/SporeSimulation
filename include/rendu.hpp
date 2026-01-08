@@ -6,7 +6,7 @@ class Rendu {
 public:
     Rendu();
     bool init(const std::string& cheminFont);
-    void menu(const Monde& monde, sf::RenderTarget& cible, bool enPause);
+    void menu(const Monde& monde, sf::RenderTarget& cible, bool enPause, const Entite* survol = nullptr);
 
 private:
     sf::Font font;

@@ -19,6 +19,8 @@ protected:
     float energie;
     TypeEntite type;
     bool vivante;
+    int id;
+    static int compteurId;
 
 public:
     Entite(sf::Vector2f pos, TypeEntite type, float rayon = 15.f, float energie = 100.f);
@@ -30,7 +32,9 @@ public:
     sf::Vector2f getPosition() const { return position; }
     float getRayon() const { return rayon; }
     float getEnergie() const { return energie; }
+    int getId() const { return id; }
     TypeEntite getType() const { return type; }
+
     bool estVivante() const { return vivante; }
     void tuer() { vivante = false; }
     void setEnergie(float e) { energie = e; }

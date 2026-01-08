@@ -29,4 +29,5 @@ public:
     Stats getStats() const;
     sf::FloatRect getLimites() const { return limites; }
     Entite* getPlusProche(sf::Vector2f pos, TypeEntite typeCherche);
+    Entite* getEntiteSousSouris(sf::Vector2f pos, float rayon = 30.f);
 };

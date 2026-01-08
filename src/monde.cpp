@@ -74,9 +74,9 @@ Entite* Monde::getPlusProche(sf::Vector2f pos, TypeEntite typeCherche) {
         if (e->estVivante() && e->getType() == typeCherche) {
             float dx = e->getPosition().x - pos.x;
             float dy = e->getPosition().y - pos.y;
-            float d = std::sqrt(dx * dx + dy * dy);
-            if (d < distMin) {
-                distMin = d;
+            float distance = std::sqrt(dx * dx + dy * dy);
+            if (distance < distMin) {
+                distMin = distance;
                 cible = e.get();
             }
         }
@@ -103,4 +103,23 @@ Stats Monde::getStats() const {
         }
     }
     return s;
+}
+
+Entite* Monde::getEntiteSousSouris(sf::Vector2f pos, float rayon) {
+    Entite* cible = nullptr;
+    float rayonCarre = rayon * rayon;
+
+    for (const auto& e : entites) {
+        if (!e->estVivante()) continue;
+        
+        float dx = e->getPosition().x - pos.x;
+        float dy = e->getPosition().y - pos.y;
+        float distanceCarree = dx*dx + dy*dy;
+
+        if (distanceCarree < rayonCarre) {
+            rayonCarre = distanceCarree;
+            cible = e.get();
+        }
+    }
+    return cible;
 }
