@@ -25,6 +25,9 @@ public:
     void spawnBacterie(sf::Vector2f pos);
     void remove();
     void reset();
+    void spawnRocher(sf::Vector2f pos);
+    bool estCache(sf::Vector2f pos) const;
+    void gererCollisionsRochers(Entite& e);
     
     Stats getStats() const;
     sf::FloatRect getLimites() const { return limites; }

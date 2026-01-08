@@ -8,7 +8,8 @@ enum class TypeEntite {
     ALGUE,
     BACTERIE,
     HERBIVORE,
-    CARNIVORE
+    CARNIVORE,
+    ROCHER
 };
 
 class Entite {
@@ -38,7 +39,5 @@ public:
     bool estVivante() const { return vivante; }
     void tuer() { vivante = false; }
     void setEnergie(float e) { energie = e; }
-
-protected:
     void setPosition(sf::Vector2f pos) { position = pos; }
 };

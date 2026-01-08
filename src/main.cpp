@@ -5,10 +5,24 @@
 
 void initialiserMonde(Monde& monde) {
     monde.reset();
-    for (int i = 0; i < 50; ++i) 
-        monde.spawnAlgue({static_cast<float>(rand() % 850 + 25), static_cast<float>(rand() % 680 + 20)});
-    for (int i = 0; i < 5; ++i) 
-        monde.spawnBacterie({static_cast<float>(rand() % 850 + 25), static_cast<float>(rand() % 680 + 20)});
+
+    for (int i = 0; i < 6; ++i) {
+        float x = static_cast<float>(rand() % 800 + 50);
+        float y = static_cast<float>(rand() % 620 + 50);
+        monde.spawnRocher({x, y});
+    }
+
+    for (int i = 0; i < 50; ++i) {
+        float x = static_cast<float>(rand() % 850 + 25);
+        float y = static_cast<float>(rand() % 680 + 20);
+        monde.spawnAlgue({x, y});
+    }
+
+    for (int i = 0; i < 5; ++i) {
+        float x = static_cast<float>(rand() % 850 + 25);
+        float y = static_cast<float>(rand() % 680 + 20);
+        monde.spawnBacterie({x, y});
+    }
 }
 
 int main() {

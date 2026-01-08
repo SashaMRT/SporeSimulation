@@ -3,6 +3,7 @@
 #include "bacterie.hpp"
 #include "herbivore.hpp"
 #include "carnivore.hpp"
+#include "rocher.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -16,28 +17,37 @@ void Monde::update(float dt) {
     for (auto& e : entites) {
         if (!e->estVivante()) continue;
 
-        sf::Vector2f pos = e->getPosition();
-        TypeEntite type = e->getType();
         e->update(dt, *this);
 
-        if (!e->estVivante() && type == TypeEntite::BACTERIE && e->getEnergie() >= 100.f) {
-            bool var = (rand() % 2 == 0);
-            if (rand() % 2 == 0) nouveau.push_back(std::make_unique<Herbivore>(pos, var));
-            else nouveau.push_back(std::make_unique<Carnivore>(pos, var));
-            continue;
+        if (e->getType() != TypeEntite::ROCHER) {
+            for (auto& r : entites) {
+                if (r->getType() == TypeEntite::ROCHER) {
+                    sf::Vector2f diff = e->getPosition() - r->getPosition();
+                    float dist = std::hypot(diff.x, diff.y);
+                    float min = e->getRayon() + r->getRayon();
+                    if (dist < min) {
+                        e->setPosition(r->getPosition() + (diff / dist) * min);
+                    }
+                }
+            }
         }
 
-        if (e->estVivante() && (type == TypeEntite::HERBIVORE || type == TypeEntite::CARNIVORE)) {
+        if (e->estVivante() && e->getType() == TypeEntite::BACTERIE && e->getEnergie() >= 100.f) {
+            e->tuer();
+            bool var = (rand() % 2 == 0);
+            if (rand() % 2 == 0) nouveau.push_back(std::make_unique<Herbivore>(e->getPosition(), var));
+            else nouveau.push_back(std::make_unique<Carnivore>(e->getPosition(), var));
+        }
+
+        if (e->estVivante() && (e->getType() == TypeEntite::HERBIVORE || e->getType() == TypeEntite::CARNIVORE)) {
             if (e->getEnergie() >= 200.f) {
                 e->setEnergie(60.f);
-                bool varEnfant = (rand() % 2 == 0);
-                sf::Vector2f offset(30.f, 30.f);
-
-                if (type == TypeEntite::HERBIVORE)
-                    nouveau.push_back(std::make_unique<Herbivore>(pos + offset, varEnfant));
+                bool var = (rand() % 2 == 0);
+                sf::Vector2f off(30.f, 30.f);
+                if (e->getType() == TypeEntite::HERBIVORE)
+                    nouveau.push_back(std::make_unique<Herbivore>(e->getPosition() + off, var));
                 else
-                    nouveau.push_back(std::make_unique<Carnivore>(pos + offset, varEnfant));
-                
+                    nouveau.push_back(std::make_unique<Carnivore>(e->getPosition() + off, var));
             }
         }
     }
@@ -60,6 +70,38 @@ void Monde::spawnAlgue(sf::Vector2f pos) {
 
 void Monde::spawnBacterie(sf::Vector2f pos) {
     entites.emplace_back(std::make_unique<Bacterie>(pos));
+}
+
+void Monde::spawnRocher(sf::Vector2f pos) {
+    entites.emplace_back(std::make_unique<Rocher>(pos));
+}
+
+void Monde::gererCollisionsRochers(Entite& e) {
+    if (e.getType() == TypeEntite::ROCHER) return;
+
+    for (auto& r : entites) {
+        if (r->estVivante() && r->getType() == TypeEntite::ROCHER) {
+            sf::Vector2f diff = e.getPosition() - r->getPosition();
+            float dist = std::hypot(diff.x, diff.y);
+            float distMin = e.getRayon() + r->getRayon();
+
+            if (dist < distMin) {
+                sf::Vector2f direction = diff / dist;
+                e.setEnergie(e.getEnergie() - 0.01f);
+            }
+        }
+    }
+}
+
+bool Monde::estCache(sf::Vector2f pos) const {
+    for (const auto& e : entites) {
+        if (e->estVivante() && e->getType() == TypeEntite::ROCHER) {
+            sf::Vector2f diff = pos - e->getPosition();
+            float dist = std::hypot(diff.x, diff.y);
+            if (dist < e->getRayon() + 10.f) return true;
+        }
+    }
+    return false;
 }
 
 void Monde::reset() {
