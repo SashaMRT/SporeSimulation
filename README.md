@@ -1,114 +1,152 @@
-# CMake SFML Project Template
+# Spore Simulation - Simulation d'Écosystème Artificiel
 
-This repository template should allow for a fast and hassle-free kick start of your next SFML project using CMake.
-Thanks to [GitHub's nature of templates](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template), you can fork this repository without inheriting its Git history.
+![C++](https://img.shields.io/badge/C++-20-blue.svg?style=flat&logo=c%2B%2B)
+![SFML](https://img.shields.io/badge/SFML-3.0-green.svg?style=flat&logo=sfml)
+![Platform](https://img.shields.io/badge/Platform-Linux%20(Recommended)-orange)
+![VS Code](https://img.shields.io/badge/IDE-VS%20Code-blueviolet.svg?logo=visual-studio-code)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-The template starts out very basic, but might receive additional features over time:
+## 1. Présentation du Projet
 
-- Basic CMake script to build your project and link SFML on any operating system
-- Basic [GitHub Actions](https://github.com/features/actions) script for all major platforms
+### 📖 Le Contexte
+Voici notre **Mini Projet** réalisé pour notre devoir de synthèse en C++.
+On est partis sur une idée qui nous plaisait bien : essayer de recréer **une simulation du jeu vidéo "Spore"**. En gros, c'est une simulation graphique en 2D où des petites créatures évoluent et survivent dans un écosystème.
 
-## Quick start
+Le but, c'était de coder un moteur capable de faire émerger des **comportements complexes** (comme la prédation, la fuite ou l'équilibre naturel) juste avec des règles simples, tout en respectant les consignes du prof.
 
-### Command line
+### 📜 Le Cahier des Charges
+Pour valider le projet, on a dû respecter plusieurs contraintes techniques :
+* **Architecture** : Tout coder en C++ avec la bibliothèque **SFML** pour l'affichage.
+* **POO (Objet)** : Avoir une structure propre avec de l'héritage (`Entite` mère), du polymorphisme (méthodes virtuelles) et de l'encapsulation.
+* **STL (Standard Template Library)** : On devait utiliser au moins 3 conteneurs différents de manière intelligente. On a choisi :
+    * `std::vector` (pour stocker les entités).
+    * `std::list` (pour gérer les particules).
+    * `std::map` (pour les statistiques).
+* **Simulation** : Le système devait être autonome, avec une vraie chaîne alimentaire et de la reproduction.
 
-1. Install [Git](https://git-scm.com/downloads) and [CMake](https://cmake.org/download/). Use your system's package manager if available.
-2. Follow [GitHub's instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) for how to use their project template feature to create your own project. If you don't want to use GitHub, see the section below.
-3. Clone your new GitHub repo and open the repo in your text editor of choice.
-4. Open [CMakeLists.txt](CMakeLists.txt). Rename the project and the target name of the executable to whatever name you want. Make sure to change all occurrences.
-5. If you want to add or remove any .cpp files, change the source files listed in the `add_executable` call in CMakeLists.txt to match the source files your project requires. If you plan on keeping the default main.cpp file then no changes are required.
-6. If your code uses the Audio or Network modules then add `SFML::Audio` or `SFML::Network` to the `target_link_libraries` call alongside the existing `SFML::Graphics` library that is being linked.
-7. If you use Linux, install SFML's dependencies using your system package manager. On Ubuntu and other Debian-based distributions you can use the following commands:
-   ```
-   sudo apt update
-   sudo apt install \
-       libxrandr-dev \
-       libxcursor-dev \
-       libxi-dev \
-       libudev-dev \
-       libfreetype-dev \
-       libflac-dev \
-       libvorbis-dev \
-       libgl1-mesa-dev \
-       libegl1-mesa-dev \
-       libfreetype-dev
-   ```
-8. Configure and build your project. Most popular IDEs support CMake projects with very little effort on your part.
+---
 
-   - [VS Code](https://code.visualstudio.com) via the [CMake extension](https://code.visualstudio.com/docs/cpp/cmake-linux)
-   - [Visual Studio](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170)
-   - [CLion](https://www.jetbrains.com/clion/features/cmake-support.html)
-   - [Qt Creator](https://doc.qt.io/qtcreator/creator-project-cmake.html)
+## 2. L'Équipe et les Crédits
 
-   Using CMake from the command line is straightforward as well.
-   Be sure to run these commands in the root directory of the project you just created.
+### 👥 Qui a fait quoi ?
+On a travaillé en binôme sur ce projet :
 
-   ```
-   cmake -B build
-   cmake --build build
-   ```
+| Auteur | Rôle & Responsabilités | Contact |
+| :--- | :--- | :--- |
+| **Sasha Marie te Rehost** | **Moteur, Interface & Graphismes**<br>• J'ai géré le moteur principal du jeu (la boucle, la gestion du Monde).<br>• Je me suis occupé de la fenêtre et des événements.<br>• J'ai codé toute l'interface (HUD, Menus) et le système de stats (`std::map`).<br>• J'ai aussi fait les graphismes procéduraux et les particules. | [sasha.marieterehost@gmail.com](mailto:sasha.marieterehost@gmail.com) |
+| **Gael Guinaliu** | **Gameplay & Simulation**<br>• Il a géré la logique de Gameplay (IA, Comportements).<br>• Il a mis en place le système d'évolution et de génétique.<br>• Il s'est occupé de la physique et des collisions. | [rodez.gael@gmail.com](mailto:rodez.gael@gmail.com) |
 
-9. Enjoy!
+### 🏆 Merci à...
+* **Pour la base** : Pour partir sur une structure propre (CMake compatible SFML 3), on a utilisé le template **cmake-sfml-project** disponible ici : [https://github.com/SFML/cmake-sfml-project](https://github.com/SFML/cmake-sfml-project).
+* **SFML** : Merci à l'équipe de la SFML, c'est une librairie super agréable à utiliser (FAUX).
 
-### Visual Studio
+---
 
-Using a Visual Studio workspace is the simplest way to get started on windows.
+## 3. Comment ça marche ?
 
-1. Ensure you have the [required components installed](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio#installation).
-2. Follow [GitHub's instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) for how to use their project template feature to create your own project.
-3. If you have already cloned this repo, you can [open the folder](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio0#ide-integration).
-4. If not, you can [clone it directly in Visual Studio](https://learn.microsoft.com/en-us/visualstudio/get-started/tutorial-open-project-from-repo).
+Le programme simule un "bocal" virtuel. Voici les règles du jeu :
 
-Visual Studio should automatically configure the CMake project, then you can build and run as normal through Visual Studio. See the links above for more details.
+### 🧬 Le Cycle de la Vie
+1.  **Algues** : Elles apparaissent toutes seules. C'est la nourriture de base.
+2.  **Bactéries** : Elles mangent les algues. Si elles ont assez d'énergie, elles **évoluent** (au hasard) en Herbivore ou en Carnivore.
+3.  **Herbivores** : Ils mangent les algues, essaient de fuir les prédateurs et se reproduisent entre eux.
+4.  **Carnivores** : Ils chassent les herbivores pour survivre.
+5.  **Rochers** : Ce sont des obstacles, mais les petites créatures peuvent s'en servir pour se cacher.
 
-## Upgrading SFML
+### 🧠 Évolution et IA
+Chaque créature a son propre "ADN" (Vitesse, Taille, Vue).
+Quand elles se reproduisent :
+* Le parent perd de l'énergie.
+* L'enfant hérite des stats du parent, mais avec une petite **mutation aléatoire** (+/- 15%).
+* **Résultat** : Les animaux trop lents se font manger, et ceux qui ne voient rien meurent de faim. C'est la sélection naturelle !
 
-SFML is found via CMake's [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) module.
-FetchContent automatically downloads SFML from GitHub and builds it alongside your own code.
-Beyond the convenience of not having to install SFML yourself, this ensures ABI compatibility and simplifies things like specifying static versus shared libraries.
+---
 
-Modifying what version of SFML you want is as easy as changing the `GIT_TAG` argument.
-Currently it uses SFML 3 via the `3.0.2` tag.
+## 4. Architecture du Code
 
-## But I want to...
+On a essayé de faire une architecture modulaire pour ne pas se perdre dans le code.
 
-Modify CMake options by adding them as configuration parameters (with a `-D` flag) or by modifying the contents of CMakeCache.txt and rebuilding.
+### 🏗 Structure (Classes)
+* **`Entite` (Classe Mère)** : Elle définit ce qu'est une créature (position, énergie, méthode `update()`...).
+    * `Algue`, `Bacterie`, `Herbivore`, `Carnivore`, `Rocher` héritent tous de `Entite`.
+* **`Monde`** : C'est la classe principale qui contient tout le monde et gère les interactions.
+* **`Rendu`** : Elle ne s'occupe que de l'affichage (l'interface, les textes, les jauges).
 
-### Not use GitHub
+### 💾 Nos choix pour la STL
+Comme demandé, on utilise 3 conteneurs différents pour des raisons précises :
 
-You can use this project without a GitHub account by [downloading the contents](https://github.com/SFML/cmake-sfml-project/archive/refs/heads/master.zip) of the repository as a ZIP archive and unpacking it locally.
-This approach also avoids using Git entirely if you would prefer to not do that.
+1.  **`std::vector`** pour les Entités : C'est le plus rapide pour parcourir toute la liste à chaque image (ce qu'on fait tout le temps).
+2.  **`std::list`** pour les Particules : Comme les explosions créent et détruisent plein de particules tout le temps, la liste est plus efficace pour supprimer des éléments au milieu sans tout décaler.
+3.  **`std::map`** pour les Stats : Ça nous permet d'associer un type d'animal (Clé) à ses chiffres (Valeur) facilement pour l'affichage.
 
-### Change Compilers
+---
 
-See the variety of [`CMAKE_<LANG>_COMPILER`](https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER.html) options.
-In particular you'll want to modify `CMAKE_CXX_COMPILER` to point to the C++ compiler you wish to use.
+## 5. Guide d'Utilisation
 
-### Change Compiler Optimizations
+### 🖱️ Contrôles
+* **Clic Gauche** : Faire apparaître une Algue.
+* **Clic Droit** : Faire apparaître une Bactérie.
+* **Survol Souris** : Inspecter une créature (voir ses stats).
+* **Touche P** : Pause.
+* **Touche R** : Reset (tout recommencer).
+* **Échap** : Quitter.
 
-CMake abstracts away specific optimizer flags through the [`CMAKE_BUILD_TYPE`](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html) option.
-By default this project recommends `Release` builds which enable optimizations.
-Other build types include `Debug` builds which enable debug symbols but disable optimizations.
-If you're using a multi-configuration generator (as is often the case on Windows), you can modify the [`CMAKE_CONFIGURATION_TYPES`](https://cmake.org/cmake/help/latest/variable/CMAKE_CONFIGURATION_TYPES.html#variable:CMAKE_CONFIGURATION_TYPES) option.
+### 📊 L'Interface
+Sur le côté, vous verrez :
+* Les FPS et le temps.
+* Des jauges colorées pour voir l'évolution des populations.
+* Le détail des naissances et des morts.
 
-### Change Generators
+---
 
-While CMake will attempt to pick a suitable default generator, some systems offer a number of generators to choose from.
-Ubuntu, for example, offers Makefiles and Ninja as two potential options.
-For a list of generators, click [here](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html).
-To modify the generator you're using you must reconfigure your project providing a `-G` flag with a value corresponding to the generator you want.
-You can't simply modify an entry in the CMakeCache.txt file unlike the above options.
-Then you may rebuild your project with this new generator.
+## 6. Installation et Compilation (VS Code)
 
-## More Reading
+Voici comment lancer le projet. On recommande **Linux** (c'est plus simple) et **VS Code** comme demandé en cours.
 
-Here are some useful resources if you want to learn more about CMake:
+> **⚠️ ATTENTION : SFML 3 REQUISE**
+> Le projet est fait pour fonctionner avec la **SFML 3.0**. Faites attention à ne pas installer une vieille version (2.5) par erreur.
 
-- [Official CMake Tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/)
-- [How to Use CMake Without the Agonizing Pain - Part 1](https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-1.html)
-- [How to Use CMake Without the Agonizing Pain - Part 2](https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-2.html)
-- [Better CMake YouTube series by Jefferon Amstutz](https://www.youtube.com/playlist?list=PL8i3OhJb4FNV10aIZ8oF0AA46HgA2ed8g)
+### 📦 Ce qu'il vous faut
+1.  **VS Code** avec les extensions **C/C++** et **CMake Tools**.
+2.  **CMake** installé sur votre ordi.
 
-## License
+### 🐧 Sur Linux (Recommandé)
 
-The source code is dual licensed under Public Domain and MIT -- choose whichever you prefer.
+1.  Installez les outils de base :
+    ```bash
+    sudo apt-get update
+    sudo apt-get install build-essential cmake libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev
+    ```
+2.  Ouvrez VS Code (`code .`).
+3.  Acceptez les extensions si on vous le demande.
+4.  Cliquez sur **CMake: Configure** puis **Build** en bas de la fenêtre.
+5.  Lancez le jeu (Bouton Play).
+
+### 🟦 Sur Windows
+
+1.  Il vous faut un compilateur C++. On conseille **MinGW** ou **Visual Studio Community**.
+2.  Ouvrez le dossier dans VS Code.
+3.  VS Code va détecter le fichier `CMakeLists.txt`. S'il demande de configurer, dites **Oui**.
+4.  Choisissez votre compilateur (Kit) quand il le demande (ex: `GCC` ou `Visual Studio`).
+5.  Cliquez sur **Build** (ou `F7`) dans la barre bleue en bas.
+    * *Attention : La première fois c'est long, car ça télécharge SFML tout seul.*
+6.  Cliquez sur le bouton "Lecture" (Play) en bas.
+
+### 🍎 Sur macOS
+
+1.  Installez les outils : `xcode-select --install` et `brew install cmake`.
+2.  Ouvrez dans VS Code, choisissez le Kit `Clang`.
+3.  Build & Run via l'interface CMake en bas.
+
+---
+
+### 💻 En ligne de commande (Si besoin)
+
+Si vous préférez le terminal classique :
+
+```bash
+mkdir build
+cd build
+cmake ..
+cmake --build .
+./bin/SporeSimulation
