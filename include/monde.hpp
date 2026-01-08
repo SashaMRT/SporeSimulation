@@ -28,6 +28,7 @@ public:
     void spawnRocher(sf::Vector2f pos);
     bool estCache(sf::Vector2f pos) const;
     void gererCollisionsRochers(Entite& e);
+    void libererRocherProche(sf::Vector2f pos);
     
     Stats getStats() const;
     sf::FloatRect getLimites() const { return limites; }

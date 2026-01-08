@@ -7,4 +7,10 @@ public:
     
     void update(float dt, Monde& monde) override;
     void dessiner(sf::RenderTarget& cible) const override;
+
+    bool estOccupe() const { return occupe; }
+    void setOccupe(bool etat) { occupe = etat; }
+
+private:
+    bool occupe = false;
 };

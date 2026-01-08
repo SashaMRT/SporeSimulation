@@ -96,14 +96,32 @@ void Monde::gererCollisionsRochers(Entite& e) {
 bool Monde::estCache(sf::Vector2f pos) const {
     for (const auto& e : entites) {
         if (e->estVivante() && e->getType() == TypeEntite::ROCHER) {
-            sf::Vector2f diff = pos - e->getPosition();
-            float dist = std::hypot(diff.x, diff.y);
-            if (dist < e->getRayon() + 10.f) return true;
+            Rocher* r = static_cast<Rocher*>(e.get());
+            
+            if (!r->estOccupe()) {
+                sf::Vector2f diff = pos - e->getPosition();
+                float dist = std::hypot(diff.x, diff.y);
+                if (dist < e->getRayon() + 20.f) {
+                    r->setOccupe(true);
+                    return true;
+                }
+            }
         }
     }
     return false;
 }
 
+void Monde::libererRocherProche(sf::Vector2f pos) {
+    for (auto& e : entites) {
+        if (e->getType() == TypeEntite::ROCHER) {
+            float d = std::hypot(e->getPosition().x - pos.x, e->getPosition().y - pos.y);
+            if (d < e->getRayon() + 25.f) {
+                static_cast<Rocher*>(e.get())->setOccupe(false); //
+                return;
+            }
+        }
+    }
+}
 void Monde::reset() {
     entites.clear();
 }
