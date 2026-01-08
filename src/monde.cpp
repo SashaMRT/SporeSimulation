@@ -149,8 +149,11 @@ void Monde::update(float dt) {
 
     for (auto it = particules.begin(); it != particules.end();) {
         it->update(dt);
-        if (it->vie <= 0) it = particules.erase(it);
-        else ++it;
+        if (it->vie <= 0) {
+            it = particules.erase(it);
+        } else {
+            ++it;
+        }
     }
 
     remove();
@@ -231,15 +234,17 @@ void Monde::libererRocherProche(sf::Vector2f pos) {
 
 void Monde::creerExplosion(sf::Vector2f pos, sf::Color couleur, int nb) {
     for (int i = 0; i < nb; ++i) {
-        float angle = (rand() % 360) * 3.14159f / 180.f;
-        float vitesse = (rand() % 80) + 30.f;
-        float variationCouleur = (rand() % 40) - 20;
-        sf::Color couleurVar = couleur;
-        if (couleur.r + variationCouleur >= 0 && couleur.r + variationCouleur <= 255) couleurVar.r += variationCouleur;
-        if (couleur.g + variationCouleur >= 0 && couleur.g + variationCouleur <= 255) couleurVar.g += variationCouleur;
-        if (couleur.b + variationCouleur >= 0 && couleur.b + variationCouleur <= 255) couleurVar.b += variationCouleur;
-        sf::Vector2f vit(std::cos(angle) * vitesse, std::sin(angle) * vitesse);
-        particules.push_back(Particule(pos, vit, couleurVar));
+        float angle = (rand() % 360) * static_cast<float>(M_PI) / 180.f;
+        float vitMag = static_cast<float>((rand() % 80) + 30);
+        float var = static_cast<float>((rand() % 40) - 20);
+        
+        sf::Color c = couleur;
+        c.r = static_cast<std::uint8_t>(std::clamp(static_cast<int>(c.r + var), 0, 255));
+        c.g = static_cast<std::uint8_t>(std::clamp(static_cast<int>(c.g + var), 0, 255));
+        c.b = static_cast<std::uint8_t>(std::clamp(static_cast<int>(c.b + var), 0, 255));
+        
+        sf::Vector2f vit(std::cos(angle) * vitMag, std::sin(angle) * vitMag);
+        particules.push_back(Particule(pos, vit, c));
     }
 }
 

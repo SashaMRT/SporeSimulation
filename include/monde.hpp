@@ -16,7 +16,7 @@ struct Stats {
 class Monde {
 private:
     std::vector<std::unique_ptr<Entite>> entites;
-    std::vector<Particule> particules;
+    std::list<Particule> particules;
     sf::FloatRect limites;
 
     // Compteurs persistants

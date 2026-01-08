@@ -51,6 +51,8 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE
     <cstdint>
     <cstdlib>
     <ctime>
+    <map>
+    <list>
 
     <SFML/Graphics.hpp>
     <SFML/Window.hpp>
