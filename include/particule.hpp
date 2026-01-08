@@ -1,3 +1,5 @@
+#pragma once
+
 class Particule {
 public:
     sf::Vector2f position;

@@ -15,35 +15,7 @@ void Monde::update(float dt) {
     std::vector<std::unique_ptr<Entite>> nouveau;
 
     for (auto& ent : entites) {
-        if (!ent->estVivante()) {
-            sf::Color couleurParticule = sf::Color::White;
-
-            switch(ent->getType()) {
-                case TypeEntite::ALGUE:
-                    couleurParticule = sf::Color(34, 139, 34);
-                    break;
-                case TypeEntite::BACTERIE:
-                    couleurParticule = sf::Color(0, 255, 255);
-                    break;
-                case TypeEntite::HERBIVORE: {
-                    Herbivore* h = static_cast<Herbivore*>(ent.get());
-                    couleurParticule = h->estRapide() ? sf::Color(0, 191, 255) : sf::Color(50, 220, 100);
-                    libererRocherProche(ent->getPosition());
-                    break;
-                }
-                case TypeEntite::CARNIVORE:
-                    couleurParticule = sf::Color(255, 50, 50);
-                    break;
-                default:
-                    continue;
-            }
-
-            int nbParticules = static_cast<int>(ent->getRayon() * 1.5f);
-            nbParticules = std::clamp(nbParticules, 5, 30);
-            
-            creerExplosion(ent->getPosition(), couleurParticule, nbParticules);
-            continue;
-        }
+        if (!ent->estVivante()) continue;
 
         ent->update(dt, *this);
 
@@ -89,6 +61,7 @@ void Monde::update(float dt) {
                 else {
                     nouveau.push_back(std::make_unique<Herbivore>(ent->getPosition(), 60.f, 25.f, 300.f));
                 }
+                naissancesHerbivores++;
             } 
             else { 
                 int sousChoix = rand() % 3;
@@ -102,6 +75,7 @@ void Monde::update(float dt) {
                 else {
                     nouveau.push_back(std::make_unique<Carnivore>(ent->getPosition(), 160.f, 12.f, 250.f));
                 }
+                naissancesCarnivores++;
             }
         }
 
@@ -116,6 +90,7 @@ void Monde::update(float dt) {
                 float vision = muter(parent->getPorteeVue());
                 
                 nouveau.push_back(std::make_unique<Herbivore>(ent->getPosition() + sf::Vector2f(10.f, 10.f), vitesse, rayon, vision));
+                naissancesHerbivores++;
             }
             else if (ent->getType() == TypeEntite::CARNIVORE) {
                 creerExplosion(ent->getPosition(), sf::Color(255, 100, 100), 15);
@@ -127,7 +102,47 @@ void Monde::update(float dt) {
                 float vision = muter(parent->getPorteeVue());
 
                 nouveau.push_back(std::make_unique<Carnivore>(ent->getPosition() + sf::Vector2f(10.f, 10.f), vitesse, rayon, vision));
+                naissancesCarnivores++;
             }
+        }
+    }
+
+    for (const auto& ent : entites) {
+        if (!ent->estVivante()) {
+            switch(ent->getType()) {
+                case TypeEntite::ALGUE: mortsAlgues++; break;
+                case TypeEntite::BACTERIE: mortsBacteries++; break;
+                case TypeEntite::HERBIVORE: mortsHerbivores++; break;
+                case TypeEntite::CARNIVORE: mortsCarnivores++; break;
+                default: break;
+            }
+
+            sf::Color couleurParticule = sf::Color::White;
+
+            switch(ent->getType()) {
+                case TypeEntite::ALGUE:
+                    couleurParticule = sf::Color(34, 139, 34);
+                    break;
+                case TypeEntite::BACTERIE:
+                    couleurParticule = sf::Color(0, 255, 255);
+                    break;
+                case TypeEntite::HERBIVORE: {
+                    Herbivore* h = static_cast<Herbivore*>(ent.get());
+                    couleurParticule = h->estRapide() ? sf::Color(0, 191, 255) : sf::Color(50, 220, 100);
+                    libererRocherProche(ent->getPosition());
+                    break;
+                }
+                case TypeEntite::CARNIVORE:
+                    couleurParticule = sf::Color(255, 50, 50);
+                    break;
+                default:
+                    break;
+            }
+
+            int nbParticules = static_cast<int>(ent->getRayon() * 1.5f);
+            nbParticules = std::clamp(nbParticules, 5, 30);
+            
+            creerExplosion(ent->getPosition(), couleurParticule, nbParticules);
         }
     }
 
@@ -155,10 +170,12 @@ void Monde::dessiner(sf::RenderTarget& cible) const {
 
 void Monde::spawnAlgue(sf::Vector2f pos) {
     entites.emplace_back(std::make_unique<Algue>(pos));
+    naissancesAlgues++;
 }
 
 void Monde::spawnBacterie(sf::Vector2f pos) {
     entites.emplace_back(std::make_unique<Bacterie>(pos));
+    naissancesBacteries++;
 }
 
 void Monde::spawnRocher(sf::Vector2f pos) {
@@ -251,6 +268,14 @@ void Monde::dessinerFond(sf::RenderTarget& cible) const {
 
 void Monde::reset() {
     entites.clear();
+    mortsAlgues = 0;
+    mortsBacteries = 0;
+    mortsHerbivores = 0;
+    mortsCarnivores = 0;
+    naissancesAlgues = 0;
+    naissancesBacteries = 0;
+    naissancesHerbivores = 0;
+    naissancesCarnivores = 0;
 }
 
 Entite* Monde::getPlusProche(sf::Vector2f pos, TypeEntite typeCherche) {
@@ -279,13 +304,24 @@ void Monde::remove() {
 
 Stats Monde::getStats() const {
     Stats s;
+    
+    s.algues.morts = mortsAlgues;
+    s.algues.naissances = naissancesAlgues;
+    s.bacteries.morts = mortsBacteries;
+    s.bacteries.naissances = naissancesBacteries;
+    s.herbivores.morts = mortsHerbivores;
+    s.herbivores.naissances = naissancesHerbivores;
+    s.carnivores.morts = mortsCarnivores;
+    s.carnivores.naissances = naissancesCarnivores;
+
     for (const auto& e : entites) {
         if (e->estVivante()) {
             switch (e->getType()) {
-                case TypeEntite::ALGUE: s.nbAlgues++; break;
-                case TypeEntite::BACTERIE: s.nbBacteries++; break;
-                case TypeEntite::HERBIVORE: s.nbHerbivores++; break;
-                case TypeEntite::CARNIVORE: s.nbCarnivores++; break;
+                case TypeEntite::ALGUE: s.algues.vivants++; break;
+                case TypeEntite::BACTERIE: s.bacteries.vivants++; break;
+                case TypeEntite::HERBIVORE: s.herbivores.vivants++; break;
+                case TypeEntite::CARNIVORE: s.carnivores.vivants++; break;
+                default: break;
             }
         }
     }

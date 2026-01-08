@@ -31,10 +31,14 @@ int main() {
     initialiserMonde(monde, tailleInitiale);
 
     sf::Clock clock;
+    sf::Clock horlogeGlobale;
     bool enPause = false;
 
     while (window.isOpen()) {
         float dt = clock.restart().asSeconds();
+
+        float fps = (dt > 0.f) ? 1.0f / dt : 0.f;
+        float tempsTotal = horlogeGlobale.getElapsedTime().asSeconds();
 
         if (dt > 0.1f) dt = 0.1f;
 
@@ -60,6 +64,7 @@ int main() {
                     sf::Vector2f tailleActuelle(static_cast<float>(window.getSize().x), static_cast<float>(window.getSize().y));
                     initialiserMonde(monde, tailleActuelle);
                     enPause = false; 
+                    horlogeGlobale.restart();
                 }
             }
 
@@ -104,7 +109,7 @@ int main() {
             window.draw(curseur);
         }
         
-        rendu.menu(monde, window, enPause, entiteSurvolee);
+        rendu.menu(monde, window, enPause, fps, tempsTotal, entiteSurvolee);
         
         window.display();
     }

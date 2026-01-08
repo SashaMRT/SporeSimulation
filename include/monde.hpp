@@ -1,10 +1,16 @@
 #pragma once
 
+struct StatsEspece {
+    int vivants = 0;
+    int morts = 0;
+    int naissances = 0;
+};
+
 struct Stats {
-    int nbAlgues = 0;
-    int nbBacteries = 0;
-    int nbHerbivores = 0;
-    int nbCarnivores = 0;
+    StatsEspece algues;
+    StatsEspece bacteries;
+    StatsEspece herbivores;
+    StatsEspece carnivores;
 };
 
 class Monde {
@@ -12,6 +18,17 @@ private:
     std::vector<std::unique_ptr<Entite>> entites;
     std::vector<Particule> particules;
     sf::FloatRect limites;
+
+    // Compteurs persistants
+    int mortsAlgues = 0;
+    int mortsBacteries = 0;
+    int mortsHerbivores = 0;
+    int mortsCarnivores = 0;
+
+    int naissancesAlgues = 0;
+    int naissancesBacteries = 0;
+    int naissancesHerbivores = 0;
+    int naissancesCarnivores = 0;
 
 public:
     Monde(sf::FloatRect limites);
