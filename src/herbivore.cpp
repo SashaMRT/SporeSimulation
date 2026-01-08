@@ -1,13 +1,15 @@
 #include "herbivore.hpp"
 #include "monde.hpp"
 #include <cmath>
+#include <cstdint>
 
-Herbivore::Herbivore(sf::Vector2f pos, bool rapide) 
-    : Entite(pos, TypeEntite::HERBIVORE, rapide ? 10.f : 15.f, rapide ? 70.f : 100.f), isRapide(rapide) {
-    vitesse = rapide ? sf::Vector2f(160.f, 80.f) : sf::Vector2f(100.f, 50.f);
-    invisible = false;
-    chronoCache = 0.f;
-    chronoRecharge = 0.f;
+Herbivore::Herbivore(sf::Vector2f pos, float vitesse, float taille, float vue) 
+    : Entite(pos, TypeEntite::HERBIVORE, taille, 100.f),
+      vitesseMax(vitesse), porteeVue(vue), invisible(false), 
+      chronoCache(0.f), chronoRecharge(0.f) 
+{    
+    float angle = (rand() % 360) * 3.14159f / 180.f;
+    this->vitesse = sf::Vector2f(std::cos(angle), std::sin(angle)) * vitesseMax;
 }
 
 void Herbivore::update(float dt, Monde& monde) {
@@ -19,53 +21,89 @@ void Herbivore::update(float dt, Monde& monde) {
             invisible = false;
             chronoCache = 0.f;
             chronoRecharge = 20.f;
-            monde.libererRocherProche(position);
         }
         return;
     }
-    Entite* danger = monde.getPlusProche(position, TypeEntite::CARNIVORE);
-    float vue = isRapide ? 400.f : 150.f;
-    bool estChasse = false;
-    float distDanger = 0.f;
 
-    if (danger) {
-        sf::Vector2f diff = position - danger->getPosition();
-        distDanger = std::hypot(diff.x, diff.y);
-        if (distDanger < vue) estChasse = true;
+    if (chronoRecharge <= 0.f && monde.estCache(position)) {
+        invisible = true;
+        return;
     }
 
-    if (estChasse) {
-        if (chronoRecharge <= 0.f && monde.estCache(position)) {
-            invisible = true;
-            vitesse = {0.f, 0.f};
-            return;
-        } 
-        
-        sf::Vector2f fuite = position - danger->getPosition();
-        vitesse = (fuite / distDanger) * (isRapide ? 180.f : 125.f);
-    } 
+    Entite* ami = monde.getPlusProche(position, TypeEntite::HERBIVORE);
+    float vueEffective = porteeVue;
     
-    else {
-        Entite* miam = monde.getPlusProche(position, TypeEntite::ALGUE);
-        if (miam) {
-            sf::Vector2f dir = miam->getPosition() - position;
-            float dist = std::hypot(dir.x, dir.y);
-            vitesse = (dir / dist) * (isRapide ? 130.f : 90.f);
+    if (ami) {
+        float distAmi = std::hypot(ami->getPosition().x - position.x, ami->getPosition().y - position.y);
+        if (distAmi > 0.1f && distAmi < 100.f) {
+            vueEffective *= 2.0f;
+        }
+    }
+
+    Entite* danger = monde.getPlusProche(position, TypeEntite::CARNIVORE);
+    Entite* nourriture = monde.getPlusProche(position, TypeEntite::ALGUE);
+
+    bool enFuite = false;
+
+    if (danger) {
+        sf::Vector2f fuite = position - danger->getPosition();
+        float distDanger = std::hypot(fuite.x, fuite.y);
+
+        if (distDanger < vueEffective) {
+            if (distDanger > 0.001f) {
+                vitesse = (fuite / distDanger) * (vitesseMax * 1.2f);
+            } else {
+                vitesse = {vitesseMax, 0.f};
+            }
+            enFuite = true;
+            energie -= 5.f * dt;
+        }
+    }
+
+    if (!enFuite && nourriture) {
+        sf::Vector2f versNourriture = nourriture->getPosition() - position;
+        float distNourriture = std::hypot(versNourriture.x, versNourriture.y);
+        
+        if (distNourriture < vueEffective) {
+            if (distNourriture > 0.001f) {
+                vitesse = (versNourriture / distNourriture) * vitesseMax;
+            }
             
-            if (dist < rayon + miam->getRayon()) { 
-                miam->tuer(); 
-                energie += (isRapide ? 15.f : 30.f); 
+            if (distNourriture < rayon + nourriture->getRayon()) {
+                nourriture->tuer();
+                energie += 40.f;
             }
         }
     }
 
     position += vitesse * dt;
 
-    sf::FloatRect l = monde.getLimites();
-    if (position.x < l.position.x || position.x > l.size.x) vitesse.x *= -1;
-    if (position.y < l.position.y || position.y > l.size.y) vitesse.y *= -1;
+    sf::FloatRect limites = monde.getLimites();
 
-    if ((energie -= (isRapide ? 7.f : 5.f) * dt) <= 0) tuer();
+    if (position.x < limites.position.x) { 
+        position.x = limites.position.x; 
+        vitesse.x = std::abs(vitesse.x); 
+    }
+    if (position.x > limites.size.x) { 
+        position.x = limites.size.x; 
+        vitesse.x = -std::abs(vitesse.x); 
+    }
+
+    if (position.y < limites.position.y) { 
+        position.y = limites.position.y; 
+        vitesse.y = std::abs(vitesse.y); 
+    }
+
+    if (position.y > limites.size.y) { 
+        position.y = limites.size.y; 
+        vitesse.y = -std::abs(vitesse.y); 
+    }
+
+    float coutMetabolique = (rayon * 0.1f) + (vitesseMax * 0.02f);
+    energie -= coutMetabolique * dt;
+    
+    if (energie <= 0) 
+        tuer();
 }
 
 void Herbivore::dessiner(sf::RenderTarget& cible) const {
@@ -75,9 +113,13 @@ void Herbivore::dessiner(sf::RenderTarget& cible) const {
     if (std::abs(vitesse.x) > 0.1f || std::abs(vitesse.y) > 0.1f) {
         angle = std::atan2(vitesse.y, vitesse.x);
     }
-    sf::Color couleur = isRapide ? sf::Color(0, 191, 255, 200) : sf::Color(50, 220, 100, 200);
 
-    int nbTentacules = isRapide ? 3 : 5;
+    std::uint8_t bleu = static_cast<std::uint8_t>(std::clamp(vitesseMax + 50.f, 0.f, 255.f));
+    sf::Color couleurCorps(50, 200, bleu, 200);
+    sf::Color couleurTentacules(50, 220, 150, 150);
+
+    int nbTentacules = (vitesseMax > 120.f) ? 3 : 5;
+
     for (int i = 0; i < nbTentacules; ++i) {
         float angleDepart = angle + 3.14f + (i - nbTentacules / 2.f) * 0.4f;
         
@@ -92,7 +134,7 @@ void Herbivore::dessiner(sf::RenderTarget& cible) const {
             sf::CircleShape t(rayon * 0.2f);
             t.setOrigin({t.getRadius(), t.getRadius()});
             t.setPosition(posT);
-            t.setFillColor(isRapide ? sf::Color(135, 206, 250, 150) : sf::Color(100, 255, 100, 150));
+            t.setFillColor(couleurTentacules);
             cible.draw(t);
         }
     }
@@ -100,8 +142,24 @@ void Herbivore::dessiner(sf::RenderTarget& cible) const {
     sf::CircleShape corps(rayon);
     corps.setOrigin({rayon, rayon});
     corps.setPosition(position);
-    corps.setFillColor(couleur);
+    corps.setFillColor(couleurCorps);
     corps.setOutlineThickness(2.f);
     corps.setOutlineColor(sf::Color::White);
     cible.draw(corps);
+
+    if (std::abs(vitesse.x) > 0.1f || std::abs(vitesse.y) > 0.1f) {
+        sf::Vector2f posOeil = position + sf::Vector2f(std::cos(angle), std::sin(angle)) * (rayon * 0.6f);
+        
+        sf::CircleShape oeil(rayon * 0.3f);
+        oeil.setOrigin({rayon * 0.3f, rayon * 0.3f});
+        oeil.setPosition(posOeil);
+        oeil.setFillColor(sf::Color::White);
+        cible.draw(oeil);
+
+        sf::CircleShape pupille(rayon * 0.15f);
+        pupille.setOrigin({pupille.getRadius(), pupille.getRadius()});
+        pupille.setPosition(posOeil + sf::Vector2f(std::cos(angle), std::sin(angle)) * (rayon * 0.15f));
+        pupille.setFillColor(sf::Color::Black);
+        cible.draw(pupille);
+    }
 }

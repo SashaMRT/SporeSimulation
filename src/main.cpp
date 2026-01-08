@@ -20,6 +20,8 @@ void initialiserMonde(Monde& monde, sf::Vector2f tailleFenetre) {
 }
 
 int main() {
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
     sf::RenderWindow window(sf::VideoMode({1280u, 720u}), "Spore Simulation");
     window.setFramerateLimit(60);
 
@@ -38,6 +40,8 @@ int main() {
 
     while (window.isOpen()) {
         float dt = clock.restart().asSeconds();
+
+        if (dt > 0.1f) dt = 0.1f;
 
         while (const auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) 
@@ -80,11 +84,6 @@ int main() {
             monde.update(dt);
         }
 
-        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-
-        Entite* entiteSurvolee = monde.getEntiteSousSouris(worldPos);
-
         window.clear(sf::Color::Black);
         
         sf::RectangleShape zoneJeu(monde.getLimites().size);
@@ -94,6 +93,10 @@ int main() {
         window.draw(zoneJeu);
         
         monde.dessiner(window);
+
+        sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+        sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+        Entite* entiteSurvolee = monde.getEntiteSousSouris(worldPos);
 
         if (entiteSurvolee) {
             sf::CircleShape curseur(25.f);

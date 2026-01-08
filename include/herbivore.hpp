@@ -3,15 +3,19 @@
 
 class Herbivore : public Entite {
 public:
-    Herbivore(sf::Vector2f pos, bool rapide = false);
+    Herbivore(sf::Vector2f pos, float vitesse, float taille, float vue);
     void update(float dt, Monde& monde) override;
     void dessiner(sf::RenderTarget& cible) const override;
 
     bool estInvisible() const {return invisible;}
+    float getVitesseMax() const { return vitesseMax; }
+    float getPorteeVue() const { return porteeVue; }
 
 private:
-    bool isRapide;
-    bool invisible = false;
-    float chronoCache = 0.f;
-    float chronoRecharge = 0.f;
+    float vitesseMax;
+    float porteeVue;
+
+    bool invisible;
+    float chronoCache;
+    float chronoRecharge;
 };
